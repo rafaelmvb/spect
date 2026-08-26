@@ -78,9 +78,9 @@ const pluginNavItems = computed(() => {
 const isAdmin = computed(() => page.props.auth?.user?.role === 'admin');
 const perms = computed(() => page.props.auth?.permissions ?? {});
 const canView = (key) => {
-    // Admin/infoprodutor têm acesso total via backend; no front apenas para ocultar itens do menu em users de equipe.
+    // Admin tem acesso total via backend; no front apenas para ocultar itens do menu em users de equipe.
     const role = page.props.auth?.user?.role;
-    if (role === 'admin' || role === 'infoprodutor') return true;
+    if (role === 'admin') return true;
     return !!perms.value?.[key];
 };
 
@@ -96,7 +96,7 @@ const navItems = computed(() => {
     if (canView('relatorios.view')) items.push({ name: 'Relatórios', href: '/relatorios', icon: BarChart3 });
     if (canView('integracoes.view')) items.push({ name: 'Integrações', href: '/integracoes', icon: Cable });
     if (canView('email_marketing.view')) items.push({ name: 'E-mail Marketing', href: '/email-marketing', icon: Mail });
-    if (page.props.auth?.user?.role === 'admin' || page.props.auth?.user?.role === 'infoprodutor') {
+    if (page.props.auth?.user?.role === 'admin') {
         items.push({ name: 'Profissionais', href: '/profissionais', icon: Stethoscope });
         items.push({ name: 'Agendamentos', href: '/agendamentos', icon: CalendarDays });
         items.push({ name: 'Jornadas', href: '/jornadas', icon: MapPin });
@@ -113,15 +113,13 @@ const navItems = computed(() => {
         items.push({ name: 'Relatórios', href: '/member-reports', icon: FileText });
     }
 
-    // Plugins: apenas admin/infoprodutor (backend reforça)
-    if ((page.props.auth?.user?.role === 'admin' || page.props.auth?.user?.role === 'infoprodutor') && pluginNavItems.value.length) {
+    // Plugins: apenas admin (backend reforça)
+    if (page.props.auth?.user?.role === 'admin' && pluginNavItems.value.length) {
         items.push(...pluginNavItems.value);
     }
 
-    // Usuários: admin vai para /usuarios (infoprodutores). Infoprodutor/equipe vai direto para a aba Equipe.
-    if (isAdmin.value) {
-        items.push({ name: 'Usuários / Equipe', href: '/usuarios', icon: Users });
-    } else if (page.props.auth?.user?.role === 'infoprodutor' || canView('equipe.manage')) {
+    // Sem SaaS não existe mais cadastro de contas na plataforma: só a Equipe.
+    if (isAdmin.value || canView('equipe.manage')) {
         items.push({ name: 'Equipe', href: '/usuarios/equipe', icon: Users });
     }
 

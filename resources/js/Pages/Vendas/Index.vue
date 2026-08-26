@@ -53,7 +53,7 @@ const toast = ref({ message: null, type: null });
 
 const canManageRefund = computed(() => {
     const role = page.props.auth?.user?.role;
-    if (role === 'admin' || role === 'infoprodutor') return true;
+    if (role === 'admin') return true;
     return !!page.props.auth?.permissions?.['reembolsos.manage'];
 });
 let toastTimer = null;

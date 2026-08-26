@@ -631,9 +631,9 @@ class Product extends Model
 
     public function hasMemberAreaAccess(User $user): bool
     {
-        // Admin/Infoprodutor do mesmo tenant do produto tem acesso automático à área de membros
+        // Admin do mesmo tenant do produto tem acesso automático à área de membros
         // (usuário de equipe não deve ganhar acesso automático)
-        if (($user->isAdmin() || $user->isInfoprodutor()) && $user->tenant_id === $this->tenant_id) {
+        if ($user->isAdmin() && $user->tenant_id === $this->tenant_id) {
             return true;
         }
         return $this->users()->where('user_id', $user->id)->exists();

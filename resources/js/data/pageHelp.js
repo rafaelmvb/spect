@@ -777,28 +777,6 @@ const HELP = {
         ],
     },
 
-    '/usuarios': {
-        icon: '👤',
-        title: 'Usuários',
-        description: 'Gestão de contas de infoprodutores na plataforma (visível apenas para o admin master).',
-        sections: [
-            {
-                heading: 'O que você vê aqui',
-                items: [
-                    'Lista de infoprodutores com avatar, badge "Master", e-mail e data de cadastro',
-                    'Ações de criar, editar e excluir contas',
-                ],
-            },
-            {
-                heading: 'Como usar',
-                items: [
-                    'Clique em "+ Novo usuário" para criar um infoprodutor com nome, e-mail e senha',
-                    'A conta master não pode ser excluída (proteção de segurança)',
-                    'Cada infoprodutor tem um espaço isolado (tenant) com seus próprios produtos e alunos',
-                ],
-            },
-        ],
-    },
 
     // ─── Comunidade Admin ────────────────────────────────────────────────
     '/comunidade-admin': {

@@ -94,7 +94,7 @@ class TenantMailConfigService
 
     /**
      * Quando não há usuário logado (ex.: esqueci a senha), as configs de SMTP foram salvas
-     * com o tenant_id do infoprodutor. Retorna o primeiro tenant_id que tem smtp_host
+     * com o tenant_id do admin. Retorna o primeiro tenant_id que tem smtp_host
      * configurado, ou null para usar fallback do .env.
      */
     public function resolveTenantIdForMail(?int $tenantId): ?int

@@ -101,7 +101,7 @@ class ReembolsosController extends Controller
                 ['value' => RefundRequest::STATUS_REJECTED, 'label' => 'Rejeitados'],
                 ['value' => RefundRequest::STATUS_FAILED, 'label' => 'Falhou'],
             ],
-            'can_manage' => $user->isAdmin() || $user->isInfoprodutor() || $this->teamAccess->can($user, 'reembolsos.manage'),
+            'can_manage' => $user->isAdmin() || $this->teamAccess->can($user, 'reembolsos.manage'),
         ]);
     }
 
@@ -141,7 +141,7 @@ class ReembolsosController extends Controller
         if ($refundRequest->tenant_id !== $user->tenant_id) {
             abort(403);
         }
-        if (! $user->isAdmin() && ! $user->isInfoprodutor() && ! $this->teamAccess->can($user, 'reembolsos.manage')) {
+        if (! $user->isAdmin() && ! $this->teamAccess->can($user, 'reembolsos.manage')) {
             abort(403);
         }
         if ($user->isTeam()) {

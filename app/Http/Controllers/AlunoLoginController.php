@@ -41,7 +41,7 @@ class AlunoLoginController extends Controller
             return back()->withErrors(['email' => 'Sua conta está bloqueada. Entre em contato com o suporte.'])->onlyInput('email');
         }
 
-        // Admins/infoprodutores não são alunos — manda para o painel deles
+        // Admins não são alunos — manda para o painel deles
         if ($user->canAccessPanel()) {
             return redirect('/dashboard');
         }

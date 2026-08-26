@@ -30,17 +30,12 @@ const tabs = computed(() => {
 const activeTab = ref('cargos');
 
 const userTabs = computed(() => {
-    // Admin tem as 2 abas; infoprodutor/equipe só faz sentido Equipe.
+    // Sem SaaS nao ha cadastro de contas na plataforma: sobra apenas a Equipe.
     return [
-        { key: 'usuarios', label: 'Infoprodutores', href: '/usuarios', adminOnly: true },
         { key: 'equipe', label: 'Equipe', href: '/usuarios/equipe', adminOnly: false },
     ];
 });
 function isUsersTabActive(href) {
-    // Evitar que "/usuarios" fique ativo em "/usuarios/equipe"
-    if (href === '/usuarios') {
-        return page.url === '/usuarios' || page.url.startsWith('/usuarios?');
-    }
     return page.url === href || page.url.startsWith(href + '/') || page.url.startsWith(href + '?');
 }
 

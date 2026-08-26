@@ -16,8 +16,8 @@ class EnsureTeamPermission
             abort(403, 'Acesso não autorizado.');
         }
 
-        // Admin/infoprodutor passam (acesso total do tenant).
-        if ($user->isAdmin() || $user->isInfoprodutor()) {
+        // Admin passa (acesso total).
+        if ($user->isAdmin()) {
             return $next($request);
         }
 

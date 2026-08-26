@@ -97,7 +97,7 @@ class PluginServiceProvider extends ServiceProvider
         }
 
         $prefix = $slug;
-        Route::middleware(['web', 'auth', 'role:admin|infoprodutor'])
+        Route::middleware(['web', 'auth', 'role:admin'])
             ->prefix($prefix)
             ->group($routesFile);
     }

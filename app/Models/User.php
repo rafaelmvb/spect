@@ -41,7 +41,6 @@ class User extends Authenticatable
     ];
 
     public const ROLE_ADMIN = 'admin';
-    public const ROLE_INFOPRODUTOR = 'infoprodutor';
     public const ROLE_ALUNO = 'aluno';
     public const ROLE_TEAM = 'team';
     public const ROLE_PROFISSIONAL = 'profissional';
@@ -89,11 +88,6 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
-    public function isInfoprodutor(): bool
-    {
-        return $this->role === self::ROLE_INFOPRODUTOR;
-    }
-
     public function isAluno(): bool
     {
         return $this->role === self::ROLE_ALUNO;
@@ -111,7 +105,7 @@ class User extends Authenticatable
 
     public function canAccessPanel(): bool
     {
-        return $this->isAdmin() || $this->isInfoprodutor() || $this->isTeam() || $this->isProfissional();
+        return $this->isAdmin() || $this->isTeam() || $this->isProfissional();
     }
 
     public function professional(): \Illuminate\Database\Eloquent\Relations\HasOne
@@ -175,12 +169,15 @@ class User extends Authenticatable
 
     public function block(): void
     {
-        $this->update(['blocked_at' => now()]);
+        // Atribuição direta: blocked_at está em $guarded e update() o descartaria.
+        $this->blocked_at = now();
+        $this->save();
     }
 
     public function unblock(): void
     {
-        $this->update(['blocked_at' => null]);
+        $this->blocked_at = null;
+        $this->save();
     }
 
     public function neuroScores(): \Illuminate\Database\Eloquent\Relations\HasMany

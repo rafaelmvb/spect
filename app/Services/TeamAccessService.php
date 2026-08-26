@@ -12,7 +12,7 @@ class TeamAccessService
      */
     public function permissionsFor(User $user): array
     {
-        if ($user->isAdmin() || $user->isInfoprodutor()) {
+        if ($user->isAdmin()) {
             return $this->allPermissions();
         }
 
@@ -38,7 +38,7 @@ class TeamAccessService
 
     public function can(User $user, string $permission): bool
     {
-        if ($user->isAdmin() || $user->isInfoprodutor()) {
+        if ($user->isAdmin()) {
             return true;
         }
 
@@ -56,7 +56,7 @@ class TeamAccessService
      */
     public function allowedProductIdsFor(User $user): array
     {
-        if ($user->isAdmin() || $user->isInfoprodutor()) {
+        if ($user->isAdmin()) {
             $tenantId = $user->tenant_id;
             if ($tenantId === null) {
                 return [];

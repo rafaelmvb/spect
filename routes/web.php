@@ -196,17 +196,8 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
-// Menu Usuários: apenas admin pode gerenciar usuários (infoprodutores)
-Route::middleware(['auth', 'role:admin'])->prefix('usuarios')->name('usuarios.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\UsersController::class, 'index'])->name('index');
-    Route::get('/create', [\App\Http\Controllers\UsersController::class, 'create'])->name('create');
-    Route::post('/', [\App\Http\Controllers\UsersController::class, 'store'])->name('store');
-    Route::put('/{user}', [\App\Http\Controllers\UsersController::class, 'update'])->name('update');
-    Route::delete('/{user}', [\App\Http\Controllers\UsersController::class, 'destroy'])->name('destroy');
-});
-
-// Equipe: cargos e membros (admin e infoprodutor; equipe apenas se tiver permissão)
-Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'team.permission:equipe.manage'])
+// Equipe: cargos e membros (admin; equipe apenas se tiver permissão)
+Route::middleware(['auth', 'admin.tenant', 'role:admin|team', 'team.permission:equipe.manage'])
     ->prefix('usuarios/equipe')
     ->group(function () {
         Route::get('/', [\App\Http\Controllers\EquipeController::class, 'index'])->name('usuarios.equipe');
@@ -222,7 +213,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'team
         Route::post('/logs/clear', [\App\Http\Controllers\EquipeController::class, 'clearLogs'])->name('usuarios.equipe.logs.clear');
     });
 
-Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audit.log'])->group(function () {
+Route::middleware(['auth', 'admin.tenant', 'role:admin|team', 'audit.log'])->group(function () {
     Route::post('/painel/push-subscribe', [\App\Http\Controllers\PanelPwaController::class, 'pushSubscribe'])->name('panel.pwa.push-subscribe')->middleware('throttle:10,1');
     Route::get('/painel/notifications', [\App\Http\Controllers\PanelNotificationsController::class, 'index'])->name('panel.notifications.index');
     Route::patch('/painel/notifications/{notification}/read', [\App\Http\Controllers\PanelNotificationsController::class, 'markRead'])->name('panel.notifications.mark-read');
@@ -472,7 +463,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     Route::put('/configuracoes/gateways/order', [\App\Http\Controllers\GatewaysController::class, 'updateOrder'])
         ->middleware('team.permission:configuracoes.view')
         ->name('gateways.order');
-    Route::middleware('role:admin|infoprodutor')->group(function () {
+    Route::middleware('role:admin')->group(function () {
         Route::get('/gerenciar-plugins', [\App\Http\Controllers\PluginsController::class, 'index'])->name('plugins.index');
         Route::get('/gerenciar-plugins/store-plugins-list', [\App\Http\Controllers\PluginsController::class, 'storePluginsList'])->name('plugins.store.list');
         Route::get('/gerenciar-plugins/store-plugin/{slug}', [\App\Http\Controllers\PluginStoreController::class, 'show'])->name('plugins.store.show')->where('slug', '[a-z0-9\-]+');
@@ -533,7 +524,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
 
     // E-mail Marketing
     // Campanhas de Mensagens (WhatsApp / SMS)
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/mensagens', [\App\Http\Controllers\MessagingCampaignController::class, 'index'])->name('messaging.index');
         Route::get('/mensagens/criar', [\App\Http\Controllers\MessagingCampaignController::class, 'create'])->name('messaging.create');
         Route::post('/mensagens', [\App\Http\Controllers\MessagingCampaignController::class, 'store'])->name('messaging.store');
@@ -546,7 +537,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Comunidade Admin
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/comunidade-admin', [\App\Http\Controllers\AdminCommunityController::class, 'index'])->name('admin-community.index');
         Route::post('/comunidade-admin/posts', [\App\Http\Controllers\AdminCommunityController::class, 'storePost'])->name('admin-community.posts.store');
         Route::put('/comunidade-admin/posts/{post}', [\App\Http\Controllers\AdminCommunityController::class, 'updatePost'])->name('admin-community.posts.update');
@@ -571,7 +562,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Profissionais
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/profissionais', [\App\Http\Controllers\ProfessionalsController::class, 'index'])->name('professionals.index');
         Route::post('/profissionais', [\App\Http\Controllers\ProfessionalsController::class, 'store'])->name('professionals.store');
         Route::post('/profissionais/{professional}', [\App\Http\Controllers\ProfessionalsController::class, 'update'])->name('professionals.update');
@@ -608,7 +599,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // IA Contextual
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/ia', [\App\Http\Controllers\AiController::class, 'index'])->name('ai.index');
         Route::post('/ia/prompts', [\App\Http\Controllers\AiController::class, 'storePrompt'])->name('ai.prompts.store');
         Route::put('/ia/prompts/{id}', [\App\Http\Controllers\AiController::class, 'updatePrompt'])->name('ai.prompts.update');
@@ -616,7 +607,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Agendamentos
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/agendamentos', [\App\Http\Controllers\AppointmentsController::class, 'index'])->name('appointments.index');
         Route::post('/agendamentos', [\App\Http\Controllers\AppointmentsController::class, 'store'])->name('appointments.store');
         Route::put('/agendamentos/{appointment}', [\App\Http\Controllers\AppointmentsController::class, 'update'])->name('appointments.update');
@@ -630,7 +621,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Mapa Neurofuncional
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/mapa-neuro', [\App\Http\Controllers\NeuroMapController::class, 'index'])->name('neuro.index');
         Route::get('/mapa-neuro/analytics', [\App\Http\Controllers\NeuroMapController::class, 'analytics'])->name('neuro.analytics');
         Route::post('/mapa-neuro/scores', [\App\Http\Controllers\NeuroMapController::class, 'storeScore'])->name('neuro.scores.store');
@@ -645,7 +636,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Checkpoints
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/checkpoints', [\App\Http\Controllers\CheckpointsController::class, 'index'])->name('checkpoints.index');
         Route::post('/checkpoints', [\App\Http\Controllers\CheckpointsController::class, 'store'])->name('checkpoints.store');
         Route::get('/checkpoints/{checkpoint}', [\App\Http\Controllers\CheckpointsController::class, 'show'])->name('checkpoints.show');
@@ -662,7 +653,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Jornadas
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/jornadas', [\App\Http\Controllers\JourneysController::class, 'index'])->name('journeys.index');
         Route::post('/jornadas', [\App\Http\Controllers\JourneysController::class, 'store'])->name('journeys.store');
         Route::get('/jornadas/{journey}', [\App\Http\Controllers\JourneysController::class, 'show'])->name('journeys.show');
@@ -683,7 +674,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Testes Clínicos
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/testes-clinicos', [\App\Http\Controllers\ClinicalTestsController::class, 'index'])->name('clinical-tests.index');
         Route::get('/testes-clinicos/{clinicalTest}/editar', [\App\Http\Controllers\ClinicalTestsController::class, 'edit'])->name('clinical-tests.edit');
         Route::post('/testes-clinicos', [\App\Http\Controllers\ClinicalTestsController::class, 'store'])->name('clinical-tests.store');
@@ -706,7 +697,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Banners
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/banners', [\App\Http\Controllers\BannersController::class, 'index'])->name('banners.index');
         Route::post('/banners', [\App\Http\Controllers\BannersController::class, 'store'])->name('banners.store');
         Route::post('/banners/reorder', [\App\Http\Controllers\BannersController::class, 'reorder'])->name('banners.reorder');
@@ -716,7 +707,7 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Posts do blog da área de membros
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/member-posts', [\App\Http\Controllers\MemberAreaPostsController::class, 'index'])->name('member-posts.index');
         Route::post('/member-posts', [\App\Http\Controllers\MemberAreaPostsController::class, 'store'])->name('member-posts.store');
         Route::post('/member-posts/reorder', [\App\Http\Controllers\MemberAreaPostsController::class, 'reorder'])->name('member-posts.reorder');
@@ -731,13 +722,13 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|infoprodutor|team', 'audi
     });
 
     // Cursos em destaque na home da área de membros
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/member-home-featured', [\App\Http\Controllers\MemberHomeFeaturedCoursesController::class, 'index'])->name('member-home-featured.index');
         Route::post('/member-home-featured/sync', [\App\Http\Controllers\MemberHomeFeaturedCoursesController::class, 'sync'])->name('member-home-featured.sync');
     });
 
     // Músicas
-    Route::middleware(['role:admin|infoprodutor'])->group(function () {
+    Route::middleware(['role:admin'])->group(function () {
         Route::get('/musicas', [\App\Http\Controllers\MusicController::class, 'index'])->name('music.index');
         Route::post('/musicas/categorias', [\App\Http\Controllers\MusicController::class, 'storeCategory'])->name('music.categories.store');
         Route::put('/musicas/categorias/{category}', [\App\Http\Controllers\MusicController::class, 'updateCategory'])->name('music.categories.update');

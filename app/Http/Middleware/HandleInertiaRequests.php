@@ -250,8 +250,6 @@ class HandleInertiaRequests extends Middleware
             'integrations.index' => 'Integrações',
             'plugins.index' => 'Plugins',
             'checkout.builder' => 'Editar checkout',
-            'usuarios.index' => 'Usuários',
-            'usuarios.create' => 'Novo infoprodutor',
             'email-marketing.index' => 'E-mail Marketing',
             'email-marketing.create' => 'Nova campanha',
             'email-marketing.edit' => 'Editar campanha',

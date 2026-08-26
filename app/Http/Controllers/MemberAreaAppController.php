@@ -1047,7 +1047,7 @@ class MemberAreaAppController extends Controller
     public function quizReport(Request $request, string $productId, string $lessonId): JsonResponse
     {
         $user = $request->user();
-        if (! $user || ! in_array($user->role, ['admin', 'infoprodutor', 'team'])) {
+        if (! $user || ! in_array($user->role, ['admin', 'team'])) {
             abort(403);
         }
         $lesson = MemberLesson::findOrFail($lessonId);

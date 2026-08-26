@@ -11,7 +11,7 @@ class SeedTestSalesCommand extends Command
 {
     protected $signature = 'conquistas:seed-test-sales 
                             {amount=10000 : Valor em reais para somar às vendas válidas}
-                            {--tenant= : ID do tenant (opcional, usa o primeiro infoprodutor se não informado)}';
+                            {--tenant= : ID do tenant (opcional, usa o primeiro admin se não informado)}';
 
     protected $description = 'Insere uma venda de teste (gateway) para permitir testar o sistema de conquistas.';
 
@@ -21,14 +21,14 @@ class SeedTestSalesCommand extends Command
         $tenantId = $this->option('tenant') !== null ? (int) $this->option('tenant') : null;
 
         if ($tenantId === null) {
-            $infoprodutor = User::whereIn('role', ['admin', 'infoprodutor'])
+            $admin = User::where('role', 'admin')
                 ->orderBy('id')
                 ->first();
-            if (! $infoprodutor) {
-                $this->error('Nenhum usuário admin/infoprodutor encontrado.');
+            if (! $admin) {
+                $this->error('Nenhum usuário admin encontrado.');
                 return self::FAILURE;
             }
-            $tenantId = $infoprodutor->tenant_id;
+            $tenantId = $admin->tenant_id;
         }
 
         $product = Product::forTenant($tenantId)->first();

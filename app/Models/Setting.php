@@ -12,7 +12,7 @@ class Setting extends Model
     /**
      * Get setting for a tenant. When tenantId is not null, only that tenant's value is returned
      * (no fallback to master/global). When tenantId is null, only the global (tenant_id null) row is used.
-     * This ensures each infoprodutor sees only their own settings (e.g. SMTP), not the master's.
+     * This ensures each tenant sees only its own settings (e.g. SMTP), not the master's.
      */
     public static function get(string $key, mixed $default = null, ?int $tenantId = null): mixed
     {
