@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import MemberAreaAppLayout from '@/Layouts/MemberAreaAppLayout.vue';
-import { Stethoscope, Search, Star, ChevronRight, UserCircle } from 'lucide-vue-next';
+import { Stethoscope, Search, Star, ChevronRight, UserCircle, ShieldCheck, ShieldQuestion } from 'lucide-vue-next';
 import { useMemberBase } from '@/composables/useMemberBase';
 
 defineOptions({ layout: MemberAreaAppLayout });
@@ -9,9 +9,38 @@ defineOptions({ layout: MemberAreaAppLayout });
 const props = defineProps({
     product:       { type: Object, required: true },
     professionals: { type: Array, default: () => [] },
+    vinculos:      { type: Array, default: () => [] },
     base_url:      { type: String, default: '' },
     slug:          { type: String, default: '' },
 });
+
+const memberBase = useMemberBase(computed(() => props.slug));
+
+const listaVinculos = ref([...props.vinculos]);
+const enviando = ref(null);
+
+const convitesPendentes = computed(() => listaVinculos.value.filter(v => v.status === 'pending'));
+const acessosAtivos = computed(() => listaVinculos.value.filter(v => v.status === 'active'));
+
+async function responder(vinculo, acao) {
+    if (acao === 'revogar' && !window.confirm(
+        `Revogar o acesso de ${vinculo.profissional.nome}? Ele deixa de ver seus testes e sua evolução.`
+    )) return;
+
+    enviando.value = vinculo.id;
+    try {
+        const { data } = await window.axios.post(`${memberBase.value}/profissionais/vinculo/${vinculo.id}`, { acao });
+        if (data.status === 'active') {
+            vinculo.status = 'active';
+        } else {
+            listaVinculos.value = listaVinculos.value.filter(v => v.id !== vinculo.id);
+        }
+    } catch (e) {
+        window.alert(e?.response?.data?.message || 'Não foi possível concluir. Tente de novo.');
+    } finally {
+        enviando.value = null;
+    }
+}
 
 const search = ref('');
 
@@ -24,7 +53,6 @@ const filtered = computed(() => {
     );
 });
 
-const memberBase = useMemberBase(computed(() => props.slug));
 function profileUrl(p) { return `${memberBase.value}/profissionais/${p.id}`; }
 
 function stars(rating) {
@@ -44,6 +72,59 @@ function stars(rating) {
                 <p class="text-sm text-zinc-500 dark:text-zinc-400">Encontre e agende com um profissional especializado.</p>
             </div>
         </div>
+
+        <!-- Convites e acessos concedidos -->
+        <section v-if="convitesPendentes.length || acessosAtivos.length" class="space-y-3">
+
+            <div v-for="v in convitesPendentes" :key="`p-${v.id}`"
+                class="rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-700/60 dark:bg-amber-950/30">
+                <div class="flex items-start gap-3">
+                    <ShieldQuestion class="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                            {{ v.profissional.nome }} quer acompanhar você
+                        </p>
+                        <p class="mt-1 text-sm text-amber-800 dark:text-amber-200">
+                            Se você aceitar, {{ v.profissional.nome }} passa a ver os testes que ela mesma enviar e sua
+                            evolução. O que você responde por conta própria continua privado.
+                        </p>
+                        <p v-if="v.profissional.registro" class="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                            {{ v.profissional.especialidade }} · {{ v.profissional.registro }}
+                        </p>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <button type="button" :disabled="enviando === v.id" @click="responder(v, 'aceitar')"
+                                class="rounded-xl bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700 disabled:opacity-60">
+                                Aceitar
+                            </button>
+                            <button type="button" :disabled="enviando === v.id" @click="responder(v, 'recusar')"
+                                class="rounded-xl border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 disabled:opacity-60 dark:border-amber-700 dark:text-amber-200 dark:hover:bg-amber-900/40">
+                                Recusar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-for="v in acessosAtivos" :key="`a-${v.id}`"
+                class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
+                <div class="flex min-w-0 items-center gap-3">
+                    <ShieldCheck class="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                    <div class="min-w-0">
+                        <p class="truncate text-sm font-medium text-zinc-900 dark:text-white">
+                            {{ v.profissional.nome }} acompanha você
+                        </p>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                            Autorizado em {{ v.respondido_em }}
+                        </p>
+                    </div>
+                </div>
+                <button type="button" :disabled="enviando === v.id" @click="responder(v, 'revogar')"
+                    class="rounded-xl border border-zinc-200 px-3 py-1.5 text-sm text-zinc-600 transition hover:border-red-300 hover:text-red-600 disabled:opacity-60 dark:border-zinc-600 dark:text-zinc-300 dark:hover:border-red-700 dark:hover:text-red-400">
+                    Revogar acesso
+                </button>
+            </div>
+
+        </section>
 
         <!-- Busca -->
         <div class="relative">

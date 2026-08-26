@@ -353,13 +353,12 @@ class ProfessionalPanelController extends Controller
                 ->first();
 
             if ($product) {
-                \App\Models\ProfessionalPatientLink::firstOrCreate(
-                    [
-                        'professional_user_id' => auth()->id(),
-                        'patient_user_id'      => $appointment->user_id,
-                        'product_id'           => (string) $product->id,
-                    ],
-                    ['status' => 'active'],
+                // Consulta concluída convida; o acesso à ficha só abre quando o
+                // paciente aceitar em "Meus profissionais".
+                \App\Models\ProfessionalPatientLink::convidar(
+                    (int) auth()->id(),
+                    (int) $appointment->user_id,
+                    (string) $product->id,
                 );
             }
         }
@@ -718,9 +717,15 @@ class ProfessionalPanelController extends Controller
                 ->map(fn ($m) => ['date' => $m->checkin_date->format('d/M'), 'mood' => $m->mood])
                 ->toArray();
 
-            // Testes concluídos
+            // Só os testes que ESTE profissional atribuiu a ESTE paciente.
+            // O que a pessoa responde por conta própria no app é privado dela.
+            $testesAtribuidos = \App\Models\ProfessionalTestAssignment::where('professional_user_id', $user->id)
+                ->where('patient_user_id', $patient->id)
+                ->pluck('clinical_test_id');
+
             $completedTests = \App\Models\ClinicalTestSession::where('user_id', $patient->id)
                 ->where('status', 'completed')
+                ->whereIn('clinical_test_id', $testesAtribuidos)
                 ->with('test:id,name,category')
                 ->latest('completed_at')
                 ->limit(5)
@@ -773,17 +778,18 @@ class ProfessionalPanelController extends Controller
             return response()->json(['message' => 'Este paciente não está cadastrado em nenhum produto deste tenant.'], 422);
         }
 
-        \App\Models\ProfessionalPatientLink::firstOrCreate(
-            [
-                'professional_user_id' => $user->id,
-                'patient_user_id'      => $patient->id,
-                'product_id'           => (string) $product->id,
-            ],
-            ['status' => 'active'],
+        $vinculo = \App\Models\ProfessionalPatientLink::convidar(
+            (int) $user->id,
+            (int) $patient->id,
+            (string) $product->id,
         );
 
         return response()->json([
             'ok'      => true,
+            'status'  => $vinculo->status,
+            'message' => $vinculo->estaAtivo()
+                ? 'Paciente vinculado.'
+                : 'Convite enviado. A ficha abre quando o paciente aceitar.',
             'patient' => [
                 'id'         => $patient->id,
                 'name'       => $patient->name,

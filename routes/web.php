@@ -824,6 +824,10 @@ Route::prefix('m')->middleware(['member.area.resolve.from.user', 'member.area.ac
     Route::get('profissionais', [\App\Http\Controllers\MemberProfessionalsController::class, 'index']);
     Route::get('profissionais/{professionalId}', [\App\Http\Controllers\MemberProfessionalsController::class, 'show'])->whereNumber('professionalId');
     Route::post('profissionais/{professionalId}/avaliar', [\App\Http\Controllers\MemberProfessionalsController::class, 'storeReview'])->middleware('throttle:5,1');
+    // Aluno aceita, recusa ou revoga o acesso de um profissional aos seus dados.
+    Route::post('profissionais/vinculo/{linkId}', [\App\Http\Controllers\MemberProfessionalsController::class, 'responderVinculo'])
+        ->whereNumber('linkId')
+        ->middleware('throttle:20,1');
     Route::get('profissionais/{professionalId}/horarios', [\App\Http\Controllers\MemberProfessionalsController::class, 'slots']);
     Route::get('meus-agendamentos', [\App\Http\Controllers\MemberAppointmentsController::class, 'index']);
     Route::post('meus-agendamentos', [\App\Http\Controllers\MemberAppointmentsController::class, 'store'])->middleware('throttle:10,1');
@@ -951,6 +955,10 @@ Route::middleware(['web', 'member.area.resolve.by.host'])->group(function () {
 
         // ── Profissionais (host) — apenas avaliação; listagem e detalhe via /m/{slug}
         Route::post('profissionais/{professionalId}/avaliar', [\App\Http\Controllers\MemberProfessionalsController::class, 'storeReview'])->middleware('throttle:5,1')->name('member-area-app.profissional.review.host');
+        Route::post('profissionais/vinculo/{linkId}', [\App\Http\Controllers\MemberProfessionalsController::class, 'responderVinculo'])
+            ->whereNumber('linkId')
+            ->middleware('throttle:20,1')
+            ->name('member-area-app.profissional.vinculo.host');
 
         // ── Agendamentos do aluno (host) ──────────────────────────────────
         Route::get('meus-agendamentos', [\App\Http\Controllers\MemberAppointmentsController::class, 'index'])->name('member-area-app.agendamentos.host');

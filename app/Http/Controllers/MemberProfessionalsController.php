@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Professional;
+use App\Models\ProfessionalPatientLink;
 use App\Models\ProfessionalReview;
 use App\Services\MemberAreaResolver;
 use App\Services\StorageService;
@@ -40,6 +41,7 @@ class MemberProfessionalsController extends Controller
             'product'       => ['id' => $product->id, 'name' => $product->name, 'slug' => $product->checkout_slug],
             'config'        => $product->member_area_config,
             'professionals' => $professionals,
+            'vinculos'      => $this->vinculosDoAluno($request, $product->id, $storage),
             'base_url'      => $this->baseUrl($product, $request),
             'slug'          => $slug,
         ]);
@@ -255,5 +257,94 @@ class MemberProfessionalsController extends Controller
     {
         return $this->resolver->baseUrlForProduct($product)
             ?? url("/m/{$product->checkout_slug}");
+    }
+
+    /**
+     * Convites e vínculos deste aluno com profissionais.
+     *
+     * O profissional só enxerga a ficha clínica depois que o aluno aceita, e o
+     * aceite pode ser revogado a qualquer momento.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function vinculosDoAluno(Request $request, string $productId, StorageService $storage): array
+    {
+        $user = $request->user();
+        if (! $user) {
+            return [];
+        }
+
+        return ProfessionalPatientLink::where('patient_user_id', $user->id)
+            ->where('product_id', $productId)
+            ->whereIn('status', [
+                ProfessionalPatientLink::STATUS_PENDING,
+                ProfessionalPatientLink::STATUS_ACTIVE,
+            ])
+            ->get()
+            ->map(function (ProfessionalPatientLink $link) use ($storage) {
+                $profissional = Professional::where('user_id', $link->professional_user_id)->first();
+
+                return [
+                    'id' => $link->id,
+                    'status' => $link->status,
+                    'profissional' => $profissional ? [
+                        'nome' => $profissional->name,
+                        'especialidade' => $profissional->specialty,
+                        'registro' => trim(($profissional->registration_type ?? '').' '.($profissional->registration_number ?? '')),
+                        'avatar' => $profissional->avatar ? $storage->url($profissional->avatar) : null,
+                    ] : null,
+                    'convidado_em' => $link->requested_at?->format('d/m/Y'),
+                    'respondido_em' => $link->responded_at?->format('d/m/Y'),
+                ];
+            })
+            ->filter(fn (array $v) => $v['profissional'] !== null)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Aluno aceita, recusa ou revoga o vínculo com um profissional.
+     */
+    public function responderVinculo(Request $request, string $slug, int $linkId): JsonResponse
+    {
+        $validado = $request->validate([
+            'acao' => ['required', 'string', 'in:aceitar,recusar,revogar'],
+        ]);
+
+        $product = $this->getProduct($request);
+        $user = $request->user();
+
+        $link = ProfessionalPatientLink::where('id', $linkId)
+            ->where('patient_user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->first();
+
+        if (! $link) {
+            return response()->json(['message' => 'Vínculo não encontrado.'], 404);
+        }
+
+        $novoStatus = match ($validado['acao']) {
+            'aceitar' => ProfessionalPatientLink::STATUS_ACTIVE,
+            'recusar' => ProfessionalPatientLink::STATUS_DECLINED,
+            'revogar' => ProfessionalPatientLink::STATUS_REVOKED,
+        };
+
+        // Aceitar só faz sentido sobre um convite pendente.
+        if ($validado['acao'] === 'aceitar' && $link->status !== ProfessionalPatientLink::STATUS_PENDING) {
+            return response()->json(['message' => 'Este convite não está mais pendente.'], 422);
+        }
+
+        $link->update([
+            'status' => $novoStatus,
+            'responded_at' => now(),
+        ]);
+
+        $mensagem = match ($validado['acao']) {
+            'aceitar' => 'Profissional autorizado a ver seus testes e evolução.',
+            'recusar' => 'Convite recusado.',
+            'revogar' => 'Acesso revogado. O profissional não vê mais seus dados.',
+        };
+
+        return response()->json(['ok' => true, 'status' => $novoStatus, 'message' => $mensagem]);
     }
 }
