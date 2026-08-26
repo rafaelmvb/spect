@@ -3,39 +3,37 @@
 namespace App\Listeners;
 
 use App\Events\OrderCompleted;
-use App\Events\AccessDeliveryReady;
-use App\Services\AccessEmailService;
+use App\Jobs\SendAccessEmailJob;
+use App\Support\QueueHealth;
 use Illuminate\Support\Facades\Log;
 
 class SendAccessEmailOnOrderCompleted
 {
-    public function __construct(
-        protected AccessEmailService $accessEmailService
-    ) {}
-
     public function handle(OrderCompleted $event): void
     {
         $order = $event->order;
-        Log::info('SendAccessEmailOnOrderCompleted: disparando envio de e-mail de acesso.', ['order_id' => $order->id]);
 
-        try {
-            // Dispara evento de WhatsApp (AutoZap) com dados prontos de acesso (best-effort).
-            $access = $this->accessEmailService->getAccessDataForOrder($order);
-            if (is_array($access)) {
-                AccessDeliveryReady::dispatch($order, $access);
-            }
-
-            $sent = $this->accessEmailService->sendForOrder($order);
-            if (! $sent) {
-                Log::warning('SendAccessEmailOnOrderCompleted: sendForOrder retornou false.', ['order_id' => $order->id]);
-            }
-        } catch (\Throwable $e) {
-            Log::error('SendAccessEmailOnOrderCompleted: exceção ao enviar e-mail.', [
+        // Sem worker ativo, enfileirar é o mesmo que não enviar: cai para
+        // síncrono. Com worker, o SMTP sai da requisição do webhook do gateway.
+        if (QueueHealth::precisaRodarSincrono()) {
+            Log::info('SendAccessEmailOnOrderCompleted: sem worker, enviando de forma síncrona.', [
                 'order_id' => $order->id,
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
             ]);
-            throw $e;
+
+            try {
+                SendAccessEmailJob::dispatchSync($order->id);
+            } catch (\Throwable $e) {
+                // Sem rethrow: o pagamento já foi confirmado e propagar aqui
+                // devolveria erro ao gateway, provocando retentativa do webhook.
+                Log::error('SendAccessEmailOnOrderCompleted: falha no envio síncrono.', [
+                    'order_id' => $order->id,
+                    'message' => $e->getMessage(),
+                ]);
+            }
+
+            return;
         }
+
+        SendAccessEmailJob::dispatch($order->id);
     }
 }

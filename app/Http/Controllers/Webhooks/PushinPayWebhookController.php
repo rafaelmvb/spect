@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessPaymentWebhook;
-use App\Models\GatewayCredential;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 class PushinPayWebhookController extends Controller
 {
+    use VerificaAssinaturaWebhook;
+
     /**
      * Handle Pushin Pay webhook (POST /webhooks/gateways/pushinpay).
      * Payload: id, value, status ("created" | "paid" | "canceled"), end_to_end_id.
@@ -52,28 +53,4 @@ class PushinPayWebhookController extends Controller
         return response()->json(['received' => true]);
     }
 
-    /**
-     * Verifica assinatura HMAC do body (header customizado). Se webhook_secret estiver configurado, exige match.
-     */
-    private function verifyWebhookSignature(string $gatewaySlug, ?int $tenantId, Request $request): bool
-    {
-        $credential = GatewayCredential::forTenant($tenantId)
-            ->where('gateway_slug', $gatewaySlug)
-            ->where('is_connected', true)
-            ->first();
-        if (! $credential) {
-            return true;
-        }
-        $credentials = $credential->getDecryptedCredentials();
-        $secret = $credentials['webhook_secret'] ?? null;
-        if ($secret === null || $secret === '') {
-            return true;
-        }
-        $signature = $request->header('X-Webhook-Signature') ?? $request->header('X-Signature');
-        if (! is_string($signature) || $signature === '') {
-            return false;
-        }
-        $expected = 'sha256=' . hash_hmac('sha256', $request->getContent(), $secret);
-        return hash_equals($expected, $signature);
-    }
 }

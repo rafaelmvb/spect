@@ -145,6 +145,25 @@ final class CustomerClientUnitTest extends BaseClient
         $this->assertSame("3000", $customer->address->street_number);
     }
 
+    public function testDeleteSuccess(): void
+    {
+        $filepath = '../../../../Resources/Mocks/Response/Customer/customer_base.json';
+        $mock_http_request = $this->mockHttpRequest($filepath, 200);
+
+        $http_client = new MPDefaultHttpClient($mock_http_request);
+        MercadoPagoConfig::setHttpClient($http_client);
+
+        $client = new CustomerClient();
+        $customer_id = "1469979538-52qKdADBYeloaX";
+        $customer = $client->delete($customer_id);
+        $this->assertSame(200, $customer->getResponse()->getStatusCode());
+        $this->assertSame("1469979538-52qKdADBYeloaX", $customer->id);
+        $this->assertSame("test_cust_1693832456@testuser.com", $customer->email);
+        $this->assertSame("Test", $customer->first_name);
+        $this->assertSame("Customer", $customer->last_name);
+        $this->assertSame("active", $customer->status);
+    }
+
     public function testSearchSuccess(): void
     {
         $filepath = '../../../../Resources/Mocks/Response/Customer/customer_search.json';
@@ -188,6 +207,23 @@ final class CustomerClientUnitTest extends BaseClient
         $this->assertSame("active", $customers->results[1]->status);
     }
 
+    public function testSearchAllSuccess(): void
+    {
+        $filepath = '../../../../Resources/Mocks/Response/Customer/customer_search.json';
+        $mock_http_request = $this->mockHttpRequest($filepath, 200);
+
+        $http_client = new MPDefaultHttpClient($mock_http_request);
+        MercadoPagoConfig::setHttpClient($http_client);
+
+        $client = new CustomerClient();
+        $search_request = new \MercadoPago\Net\MPSearchRequest(10, 0, ["email" => "test@test.com"]);
+        $result = $client->searchAll($search_request);
+
+        $this->assertInstanceOf(\Generator::class, $result);
+        $pages = iterator_to_array($result);
+        $this->assertNotEmpty($pages);
+    }
+
     private function createRequest(): array
     {
         $request = [
@@ -210,8 +246,8 @@ final class CustomerClientUnitTest extends BaseClient
                 "street_number" => 3003,
                 "city" => [
                     "name" => "Osasco",
-                ]
-            ]
+                ],
+            ],
         ];
         return $request;
     }

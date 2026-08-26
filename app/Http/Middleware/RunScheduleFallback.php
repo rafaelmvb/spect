@@ -42,16 +42,18 @@ class RunScheduleFallback
             return;
         }
 
-        $lastRun = Cache::get(self::CACHE_KEY);
-        if ($lastRun && Carbon::parse($lastRun)->gte(now()->subSeconds(self::THROTTLE_SECONDS))) {
+        // Cache::add e atomico: so o primeiro request da janela grava e segue.
+        // Com get+put, duas requisicoes simultaneas disparavam schedule:run juntas.
+        if (! Cache::add(self::CACHE_KEY, now()->toIso8601String(), self::THROTTLE_SECONDS)) {
             return;
         }
 
-        Cache::put(self::CACHE_KEY, now()->toIso8601String(), now()->addMinutes(5));
         try {
             Artisan::call('schedule:run');
-        } catch (\Throwable) {
-            return;
+        } catch (\Throwable $e) {
+            // Sem rethrow: isto roda depois da resposta e não pode afetar a
+            // requisição já entregue. Mas registra, senão a falha some.
+            report($e);
         }
     }
 

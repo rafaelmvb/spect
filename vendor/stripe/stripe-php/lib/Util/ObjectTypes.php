@@ -13,7 +13,7 @@ class ObjectTypes
             \Stripe\Issuing\CardDetails::OBJECT_NAME => \Stripe\Issuing\CardDetails::class,
             \Stripe\SearchResult::OBJECT_NAME => \Stripe\SearchResult::class,
             \Stripe\File::OBJECT_NAME_ALT => \Stripe\File::class,
-            // The beginning of the section generated from our OpenAPI spec
+            // object classes: The beginning of the section generated from our OpenAPI spec
             \Stripe\Account::OBJECT_NAME => \Stripe\Account::class,
             \Stripe\AccountLink::OBJECT_NAME => \Stripe\AccountLink::class,
             \Stripe\AccountSession::OBJECT_NAME => \Stripe\AccountSession::class,
@@ -52,6 +52,7 @@ class ObjectTypes
             \Stripe\Discount::OBJECT_NAME => \Stripe\Discount::class,
             \Stripe\Dispute::OBJECT_NAME => \Stripe\Dispute::class,
             \Stripe\Entitlements\ActiveEntitlement::OBJECT_NAME => \Stripe\Entitlements\ActiveEntitlement::class,
+            \Stripe\Entitlements\ActiveEntitlementSummary::OBJECT_NAME => \Stripe\Entitlements\ActiveEntitlementSummary::class,
             \Stripe\Entitlements\Feature::OBJECT_NAME => \Stripe\Entitlements\Feature::class,
             \Stripe\EphemeralKey::OBJECT_NAME => \Stripe\EphemeralKey::class,
             \Stripe\Event::OBJECT_NAME => \Stripe\Event::class,
@@ -146,6 +147,6 @@ class ObjectTypes
             \Stripe\UsageRecord::OBJECT_NAME => \Stripe\UsageRecord::class,
             \Stripe\UsageRecordSummary::OBJECT_NAME => \Stripe\UsageRecordSummary::class,
             \Stripe\WebhookEndpoint::OBJECT_NAME => \Stripe\WebhookEndpoint::class,
-            // The end of the section generated from our OpenAPI spec
+            // object classes: The end of the section generated from our OpenAPI spec
         ];
 }

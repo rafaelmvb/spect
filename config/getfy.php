@@ -22,6 +22,13 @@ return [
         ),
         /** Se true, todos os webhooks de integração rodam síncronos (pode alongar requests). */
         'dispatch_all_sync' => filter_var(env('GETFY_WEBHOOKS_DISPATCH_ALL_SYNC', false), FILTER_VALIDATE_BOOLEAN),
+
+        /*
+        | Recusa webhook de gateway sem webhook_secret configurado. Default false
+        | para não derrubar confirmação de pagamento em quem ainda não definiu os
+        | secrets — ative depois de configurar todos (o log aponta quais faltam).
+        */
+        'require_signature' => filter_var(env('GETFY_WEBHOOKS_REQUIRE_SIGNATURE', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
     /*

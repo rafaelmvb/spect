@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Support\QueueHealth;
 use App\Events\BoletoGenerated;
 use App\Events\CartAbandoned;
 use App\Events\OrderCancelled;
@@ -21,7 +22,6 @@ use App\Models\CheckoutSession;
 use App\Models\Subscription;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 
@@ -127,27 +127,8 @@ class WebhookEventSubscriber
             return true;
         }
 
-        // Em dev/local, é comum não ter worker configurado corretamente; dispara sync para evitar “silêncio”.
-        if (app()->environment('local')) {
-            return true;
-        }
-
-        if (config('queue.default') === 'sync') {
-            return true;
-        }
-
-        $heartbeat = Cache::get('queue_heartbeat');
-        if (! is_string($heartbeat) || $heartbeat === '') {
-            return true;
-        }
-
-        try {
-            $last = \Illuminate\Support\Carbon::parse($heartbeat);
-        } catch (\Throwable) {
-            return true;
-        }
-
-        return $last->lt(now()->subMinutes(3));
+        // Mesma checagem de worker usada pelo envio de e-mail de acesso.
+        return QueueHealth::precisaRodarSincrono();
     }
 
     /**

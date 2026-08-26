@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Webhooks;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessPaymentWebhook;
-use App\Models\GatewayCredential;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class SpacepagWebhookController extends Controller
 {
+    use VerificaAssinaturaWebhook;
+
     public function handle(Request $request): JsonResponse
     {
         $payload = $request->all();
@@ -145,29 +146,4 @@ class SpacepagWebhookController extends Controller
         }
     }
 
-    /**
-     * Verifica assinatura HMAC do body (header X-Webhook-Signature: sha256=hex). Se webhook_secret estiver configurado, exige match.
-     */
-    private function verifyWebhookSignature(string $gatewaySlug, ?int $tenantId, Request $request): bool
-    {
-        $credential = GatewayCredential::forTenant($tenantId)
-            ->where('gateway_slug', $gatewaySlug)
-            ->where('is_connected', true)
-            ->first();
-        if (! $credential) {
-            return true;
-        }
-        $credentials = $credential->getDecryptedCredentials();
-        $secret = $credentials['webhook_secret'] ?? null;
-        if ($secret === null || $secret === '') {
-            return true;
-        }
-        $signature = $request->header('X-Webhook-Signature') ?? $request->header('X-Signature');
-        if (! is_string($signature) || $signature === '') {
-            return false;
-        }
-        $expected = 'sha256='.hash_hmac('sha256', $request->getContent(), $secret);
-
-        return hash_equals($expected, $signature);
-    }
 }

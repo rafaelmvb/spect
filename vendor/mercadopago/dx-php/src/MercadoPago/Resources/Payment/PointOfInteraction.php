@@ -4,27 +4,36 @@ namespace MercadoPago\Resources\Payment;
 
 use MercadoPago\Serialization\Mapper;
 
-/** PointOfInteraction class. */
+/**
+ * Represents the point of interaction where the payment was initiated in the MercadoPago API.
+ *
+ * Describes the channel or device through which the payer interacted to make the payment,
+ * such as a QR code, deep link, or IVR system. Nested within {@see \MercadoPago\Resources\Payment}.
+ */
 class PointOfInteraction
 {
-    /** Class mapper. */
+    /** Maps nested objects to their corresponding DTO classes. */
     use Mapper;
 
-    /** Type. */
+    /** Interaction type (e.g. "OPENPLATFORM", "ATML", "QR"). */
     public ?string $type;
 
-    /** Sub type. */
+    /** Interaction subtype providing additional classification. */
     public ?string $sub_type;
 
-    /** Application data. */
+    /** @var ApplicationData|array|null Application that generated the interaction. */
     public array|object|null $application_data;
 
-    /** Transaction data. */
+    /** @var TransactionData|array|null Transaction data generated at the point of interaction (e.g. QR content, ticket URL). */
     public array|object|null $transaction_data;
+
+    /** @var NetworkData|array|null Card-network identifiers for a COF payment. */
+    public array|object|null $network_data;
 
     private $map = [
         "application_data" => "MercadoPago\Resources\Payment\ApplicationData",
         "transaction_data" => "MercadoPago\Resources\Payment\TransactionData",
+        "network_data" => "MercadoPago\Resources\Payment\NetworkData",
     ];
 
     /**
