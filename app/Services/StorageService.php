@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Support\StorageVisibility;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
@@ -13,6 +14,8 @@ class StorageService
     private ?int $tenantId = null;
 
     private ?Filesystem $disk = null;
+
+    private ?Filesystem $restrictedDisk = null;
 
     private bool $isLocal = true;
 
@@ -105,13 +108,41 @@ class StorageService
     }
 
     /**
+     * Disco de conteúdo restrito.
+     *
+     * Em armazenamento local vai para storage/app/private, fora do alcance de
+     * GET /storage/{path}. Em S3/R2 fica no mesmo bucket — o que protege ali é
+     * a URL nunca ser exposta: o acesso passa sempre por PrivateFileController.
+     */
+    public function restrictedDisk(): Filesystem
+    {
+        if ($this->restrictedDisk !== null) {
+            return $this->restrictedDisk;
+        }
+
+        $this->disk();
+
+        $this->restrictedDisk = $this->isLocal ? Storage::disk('local') : $this->disk;
+
+        return $this->restrictedDisk;
+    }
+
+    /**
+     * Disco correto para um caminho, conforme a visibilidade do prefixo.
+     */
+    private function diskFor(string $path): Filesystem
+    {
+        return StorageVisibility::isRestrito($path) ? $this->restrictedDisk() : $this->disk();
+    }
+
+    /**
      * Store an uploaded file and return the path.
      */
     public function putFile(string $directory, UploadedFile $file, ?string $name = null): string
     {
         $name = $name ?? $file->hashName();
 
-        return $this->disk()->putFileAs($directory, $file, $name);
+        return $this->diskFor($directory)->putFileAs($directory, $file, $name);
     }
 
     /**
@@ -119,7 +150,7 @@ class StorageService
      */
     public function putFileAs(string $directory, UploadedFile $file, string $name): string
     {
-        return $this->disk()->putFileAs($directory, $file, $name);
+        return $this->diskFor($directory)->putFileAs($directory, $file, $name);
     }
 
     /**
@@ -132,6 +163,12 @@ class StorageService
         }
 
         $this->disk(); // ensure disk is resolved (sets isLocal)
+
+        // Conteúdo restrito nunca recebe URL direta, nem em S3: a rota confere
+        // sessão e acesso ao produto antes de entregar o arquivo.
+        if (StorageVisibility::isRestrito($path)) {
+            return url('/arquivo/' . ltrim($path, '/'));
+        }
 
         if ($this->isLocal) {
             return url('/storage/' . ltrim($path, '/'));
@@ -149,7 +186,7 @@ class StorageService
             return false;
         }
 
-        return $this->disk()->delete($path);
+        return $this->diskFor($path)->delete($path);
     }
 
     /**
@@ -161,6 +198,6 @@ class StorageService
             return false;
         }
 
-        return $this->disk()->exists($path);
+        return $this->diskFor($path)->exists($path);
     }
 }

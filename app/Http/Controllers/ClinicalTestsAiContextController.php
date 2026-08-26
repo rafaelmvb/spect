@@ -46,7 +46,8 @@ class ClinicalTestsAiContextController extends Controller
         $isImage = str_starts_with($mime, 'image/');
         $path    = "clinical-test-ai-context/{$clinicalTest->id}/{$fileId}.{$ext}";
 
-        Storage::disk('public')->putFileAs(
+        // Anexo de teste clinico e dado sensivel: vai para o disco restrito.
+        (new \App\Services\StorageService)->putFileAs(
             "clinical-test-ai-context/{$clinicalTest->id}",
             $file,
             "{$fileId}.{$ext}"

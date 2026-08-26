@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -11,13 +12,20 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
  */
 class StorageServeController extends Controller
 {
-    public function __invoke(Request $request, string $path): BinaryFileResponse
+    public function __invoke(Request $request, string $path): BinaryFileResponse|RedirectResponse
     {
         $path = rawurldecode($path);
         $path = str_replace(['../', '..\\'], '', $path);
         $path = ltrim($path, '/\\');
         if ($path === '' || preg_match('/\\.\\./', $path)) {
             abort(404);
+        }
+
+        // Conteudo restrito sai por /arquivo/{path}, que confere sessao e acesso.
+        // Redireciona em vez de 404 porque ha URLs /storage/... ja gravadas no
+        // banco (capa de aula, midia de post). O destino faz a autorizacao.
+        if (\App\Support\StorageVisibility::isRestrito($path)) {
+            return redirect()->to('/arquivo/'.ltrim($path, '/'), 302);
         }
 
         $root = storage_path('app/public');

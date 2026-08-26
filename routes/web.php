@@ -13,6 +13,12 @@ Route::get('/storage/{path}', \App\Http\Controllers\StorageServeController::clas
     ->where('path', '.+')
     ->name('storage.serve');
 
+// Conteudo restrito: exige sessao e acesso ao produto (ver StorageVisibility)
+Route::get('/arquivo/{path}', \App\Http\Controllers\PrivateFileController::class)
+    ->where('path', '.+')
+    ->middleware('auth')
+    ->name('arquivo.restrito');
+
 // Instalador: fallback quando o servidor envia /install para o Laravel (ex: document root diferente de public/)
 Route::any('/install', [\App\Http\Controllers\InstallServeController::class, '__invoke'])->defaults('path', null);
 Route::any('/install/{path}', [\App\Http\Controllers\InstallServeController::class, '__invoke'])->where('path', '.+');

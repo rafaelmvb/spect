@@ -69,7 +69,7 @@ class ProdutosAiContextController extends Controller
         $type     = $isImage ? 'image' : 'document';
         $path     = "product-ai-context/{$produto->id}/{$fileId}.{$ext}";
 
-        Storage::disk('public')->putFileAs(
+        (new \App\Services\StorageService)->putFileAs(
             "product-ai-context/{$produto->id}",
             $file,
             "{$fileId}.{$ext}"
