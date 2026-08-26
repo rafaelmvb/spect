@@ -3,10 +3,31 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Support\ReportingPeriod;
+use Illuminate\Support\Facades\Cache;
 
 class SalesAchievementsService
 {
+    /**
+     * Este total é lido nos shared props do Inertia, ou seja, em toda página do
+     * painel e em todo reload parcial. Sem cache, cada navegação disparava um
+     * SUM sobre a tabela inteira de pedidos.
+     *
+     * A chave carrega o mesmo token de invalidação do dashboard, então uma venda
+     * concluída derruba o cache na hora (ver InvalidateDashboardCacheOnOrderCompleted).
+     */
     public function getValidSalesTotal(?int $tenantId): float
+    {
+        $chave = sprintf(
+            'sales_achievements_total:%s:%s',
+            $tenantId ?? 'global',
+            ReportingPeriod::dashboardBustToken($tenantId)
+        );
+
+        return (float) Cache::remember($chave, now()->addMinutes(10), fn (): float => $this->calcularTotalValido($tenantId));
+    }
+
+    private function calcularTotalValido(?int $tenantId): float
     {
         return (float) Order::forTenant($tenantId)
             ->where('status', 'completed')

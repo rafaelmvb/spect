@@ -140,7 +140,7 @@ class MemberProfileController extends Controller
             'location'   => ['nullable', 'string', 'max:100'],
             'gender'     => ['nullable', 'string', 'in:masculino,feminino,outro,prefiro_nao_dizer'],
             'birth_date' => ['nullable', 'date', 'before:today', 'after:1900-01-01'],
-            'avatar'     => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,svg,bmp', 'max:5120'],
+            'avatar'     => ['nullable', 'file', 'mimes:jpg,jpeg,png,gif,webp,bmp', 'max:5120'],
         ]);
 
         $storage = new StorageService($product->tenant_id);

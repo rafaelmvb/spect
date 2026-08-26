@@ -48,9 +48,19 @@ class StorageServeController extends Controller
             default => 'application/octet-stream',
         };
 
-        return response()->file($realFile, [
+        $headers = [
             'Content-Type' => $mime,
             'Cache-Control' => 'public, max-age=86400',
-        ]);
+        ];
+
+        // SVG e um documento: aberto direto na barra de enderecos, executa
+        // <script> na origem da aplicacao. A CSP o torna inerte e o attachment
+        // impede que vire pagina navegavel. Uso em <img> segue funcionando.
+        if ($mime === 'image/svg+xml') {
+            $headers['Content-Security-Policy'] = "default-src 'none'; style-src 'unsafe-inline'; sandbox";
+            $headers['Content-Disposition'] = 'attachment; filename="'.basename($realFile).'"';
+        }
+
+        return response()->file($realFile, $headers);
     }
 }

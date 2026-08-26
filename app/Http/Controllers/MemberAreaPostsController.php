@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MemberAreaPost;
 use App\Services\StorageService;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -23,7 +24,7 @@ class MemberAreaPostsController extends Controller
             'title'        => $p->title,
             'category'     => $p->category,
             'excerpt'      => $p->excerpt,
-            'content'      => $p->content,
+            'content'      => HtmlSanitizer::sanitize($p->content),
             'image_url'    => $p->image_url,
             'is_published' => $p->is_published,
             'published_at' => $p->published_at?->format('d/m/Y'),

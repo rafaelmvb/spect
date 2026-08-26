@@ -33,7 +33,11 @@ class SecurityHeaders
                 "media-src 'self' https: blob:",
                 "worker-src 'self' blob:",
             ]);
-            $response->headers->set('Content-Security-Policy', $csp);
+            // Nao sobrescreve CSP definida pela propria resposta (ex.: SVG servido
+            // inerte por StorageServeController/PluginAssetController).
+            if (! $response->headers->has('Content-Security-Policy')) {
+                $response->headers->set('Content-Security-Policy', $csp);
+            }
         }
 
         if (config('app.env') === 'production' && $request->secure()) {

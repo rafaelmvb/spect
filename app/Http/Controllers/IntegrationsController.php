@@ -6,6 +6,7 @@ use App\Gateways\GatewayRegistry;
 use App\Models\GatewayCredential;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Support\SecretSetting;
 use App\Models\CademiIntegration;
 use App\Models\SpedyIntegration;
 use App\Models\UtmifyIntegration;
@@ -146,8 +147,8 @@ class IntegrationsController extends Controller
                 'subtitle'    => 'Claude Haiku · Sonnet · Opus',
                 'description' => 'Melhor para análises clínicas detalhadas e relatórios avançados.',
                 'color'       => '#CC785C',
-                'key_hint'    => $this->maskApiKey(Setting::get('anthropic_api_key', null, $tenantId)),
-                'configured'  => ! empty(Setting::get('anthropic_api_key', null, $tenantId)),
+                'key_hint'    => $this->maskApiKey(SecretSetting::get('anthropic_api_key', $tenantId)),
+                'configured'  => SecretSetting::isSet('anthropic_api_key', $tenantId),
             ],
             [
                 'id'          => 'openai',
@@ -155,8 +156,8 @@ class IntegrationsController extends Controller
                 'subtitle'    => 'GPT-4o · GPT-4o mini',
                 'description' => 'Excelente para respostas gerais, chat e automações.',
                 'color'       => '#10A37F',
-                'key_hint'    => $this->maskApiKey(Setting::get('openai_api_key', null, $tenantId)),
-                'configured'  => ! empty(Setting::get('openai_api_key', null, $tenantId)),
+                'key_hint'    => $this->maskApiKey(SecretSetting::get('openai_api_key', $tenantId)),
+                'configured'  => SecretSetting::isSet('openai_api_key', $tenantId),
             ],
             [
                 'id'          => 'groq',
@@ -164,8 +165,8 @@ class IntegrationsController extends Controller
                 'subtitle'    => 'LLaMA 3 · Mixtral · Gemma',
                 'description' => 'Velocidade extrema com baixo custo. Compatível com API OpenAI.',
                 'color'       => '#F55036',
-                'key_hint'    => $this->maskApiKey(Setting::get('groq_api_key', null, $tenantId)),
-                'configured'  => ! empty(Setting::get('groq_api_key', null, $tenantId)),
+                'key_hint'    => $this->maskApiKey(SecretSetting::get('groq_api_key', $tenantId)),
+                'configured'  => SecretSetting::isSet('groq_api_key', $tenantId),
             ],
             [
                 'id'          => 'gemini',
@@ -173,8 +174,8 @@ class IntegrationsController extends Controller
                 'subtitle'    => 'Gemini 1.5 Pro · Flash',
                 'description' => 'Modelo multimodal do Google. Suporte em breve.',
                 'color'       => '#4285F4',
-                'key_hint'    => $this->maskApiKey(Setting::get('gemini_api_key', null, $tenantId)),
-                'configured'  => ! empty(Setting::get('gemini_api_key', null, $tenantId)),
+                'key_hint'    => $this->maskApiKey(SecretSetting::get('gemini_api_key', $tenantId)),
+                'configured'  => SecretSetting::isSet('gemini_api_key', $tenantId),
                 'coming_soon' => true,
             ],
         ];
@@ -223,7 +224,7 @@ class IntegrationsController extends Controller
         ]);
 
         $tenantId = auth()->user()->tenant_id;
-        Setting::set(self::LLM_KEY_MAP[$v['provider']], trim($v['api_key']), $tenantId);
+        SecretSetting::set(self::LLM_KEY_MAP[$v['provider']], trim($v['api_key']), $tenantId);
 
         return response()->json([
             'success'  => true,
@@ -238,7 +239,7 @@ class IntegrationsController extends Controller
         ]);
 
         $tenantId = auth()->user()->tenant_id;
-        Setting::set(self::LLM_KEY_MAP[$v['provider']], '', $tenantId);
+        SecretSetting::set(self::LLM_KEY_MAP[$v['provider']], null, $tenantId);
 
         return response()->json(['success' => true]);
     }

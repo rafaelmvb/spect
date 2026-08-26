@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AiConfig;
 use App\Models\AiInteractionLog;
 use App\Models\Setting;
+use App\Support\SecretSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -27,19 +28,19 @@ class AiService
 
     private function anthropicKey(): ?string
     {
-        $k = Setting::get('anthropic_api_key', null, $this->tenantId);
+        $k = SecretSetting::get('anthropic_api_key', $this->tenantId);
         return ($k && str_starts_with($k, 'sk-ant-')) ? $k : null;
     }
 
     private function openaiKey(): ?string
     {
-        $k = Setting::get('openai_api_key', null, $this->tenantId);
+        $k = SecretSetting::get('openai_api_key', $this->tenantId);
         return ($k && str_starts_with($k, 'sk-')) ? $k : null;
     }
 
     private function groqKey(): ?string
     {
-        $k = Setting::get('groq_api_key', null, $this->tenantId);
+        $k = SecretSetting::get('groq_api_key', $this->tenantId);
         return ($k && strlen($k) > 10) ? $k : null;
     }
 

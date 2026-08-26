@@ -359,7 +359,7 @@ class MemberAreaAppController extends Controller
                 'title'        => $memberAreaPost->title,
                 'category'     => $memberAreaPost->category,
                 'excerpt'      => $memberAreaPost->excerpt,
-                'content'      => $memberAreaPost->content,
+                'content'      => \App\Support\HtmlSanitizer::sanitize($memberAreaPost->content),
                 'image_url'    => $memberAreaPost->image_url,
                 'published_at' => $memberAreaPost->published_at?->format('d \d\e F \d\e Y'),
             ],
