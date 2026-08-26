@@ -1,0 +1,1 @@
+import{C as o,z as s}from"./Button-CNBDuoVk.js";function m(e){const n=s();return o(()=>{const r=n.props?.member_base;if(r!=null)return r;const t=typeof e=="object"?e?.value:e;return t?`/m/${t}`:""})}export{m as u};

@@ -1,0 +1,47 @@
+<FilesMatch "^\.env|^\.env\.|^composer\.(json|lock)$|^package(-lock)?\.json$|^phpunit\.xml$|^artisan$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Bloqueia arquivos sensiveis quando o DocumentRoot aponta para a raiz do projeto.
+    # Sem isto, as regras de passthrough abaixo entregam /.env, /composer.lock etc. como texto puro.
+    RewriteRule ^\.env - [F,L]
+    # 'storage' fica de fora: a regra ^storage/ abaixo reescreve para public/storage/ (uploads publicos).
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|tests|vendor|node_modules)(/|$) - [F,L]
+    RewriteRule ^(composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|artisan|vite\.config\.js|\.editorconfig|\.gitignore|\.gitattributes)$ - [F,L]
+
+    # Raiz (/) – redireciona diretamente para /login (evita 404)
+    RewriteRule ^/?$ /login [R=302,L]
+
+    # /storage/* – servir de public/storage/ (link simbólico do Laravel)
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
+
+    # /build/* – servir de public/build/ (assets Vite)
+    RewriteRule ^build/(.*)$ public/build/$1 [L]
+
+    # /images/* – servir de public/images/
+    RewriteRule ^images/(.*)$ public/images/$1 [L]
+
+    # PWA: garantir arquivos estáticos públicos quando document root não aponta para /public
+    RewriteRule ^manifest\.json$ public/manifest.json [L]
+    RewriteRule ^painel-sw\.js$ public/painel-sw.js [L]
+    RewriteRule ^icons/(.*)$ public/icons/$1 [L]
+
+    # Arquivos/diretórios existentes – não reescrever
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Demais requisições – encaminhar para o Laravel
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/index.php [L,QSA]
+</IfModule>

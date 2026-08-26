@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual do Painel Admin · Rastreio Spectra</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0b;--surface:#141414;--surface2:#1c1c1c;--surface3:#222;
+  --border:#252525;--border2:#2e2e2e;
+  --text:#e8e8e8;--text2:#aaa;--text3:#666;
+  --accent:#7c3aed;--accent-light:#a855f7;--accent-dim:rgba(124,58,237,.12);
+  --green:#22c55e;--amber:#f59e0b;--blue:#3b82f6;
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;line-height:1.6;font-size:14px}
+
+/* ── sidebar ── */
+nav{position:fixed;top:0;left:0;width:240px;height:100vh;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;z-index:100;flex-shrink:0}
+.nav-header{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.nav-logo{font-size:12px;font-weight:700;color:var(--accent-light);letter-spacing:.07em;text-transform:uppercase}
+.nav-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.nav-group{padding:6px 0;border-bottom:1px solid var(--border)}
+.nav-gtitle{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;padding:8px 16px 3px}
+.nav-item{display:block;padding:6px 16px;font-size:12.5px;color:var(--text2);text-decoration:none;transition:.12s;border-left:2px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-item:hover{color:var(--text);background:var(--surface2)}
+.nav-item.active{color:var(--accent-light);border-left-color:var(--accent);background:var(--accent-dim)}
+
+/* ── main ── */
+main{margin-left:240px;flex:1;max-width:960px;padding:44px 48px 100px}
+
+/* ── page header ── */
+.page-header{margin-bottom:44px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.page-header h1{font-size:26px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.page-header p{font-size:13px;color:var(--text2);margin-top:8px;max-width:620px;line-height:1.7}
+.badges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px}
+.b-purple{background:rgba(124,58,237,.18);color:#a855f7}
+.b-green{background:rgba(34,197,94,.12);color:#22c55e}
+.b-amber{background:rgba(245,158,11,.12);color:#f59e0b}
+
+/* ── section ── */
+.section{margin-bottom:60px;scroll-margin-top:20px}
+.sec-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px}
+.sec-icon{width:34px;height:34px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-top:2px}
+.sec-title{font-size:18px;font-weight:700;color:#fff}
+.sec-desc{font-size:12.5px;color:var(--text2);margin-top:3px}
+.sec-url{font-size:11px;font-family:Menlo,Consolas,monospace;color:var(--text3);margin-top:3px}
+
+/* ── screenshot card ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.card-label{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.card-name{font-size:12.5px;font-weight:600;color:var(--text)}
+.card-url{font-size:10.5px;font-family:Menlo,Consolas,monospace;color:var(--text3);background:var(--surface2);padding:2px 7px;border-radius:4px;flex-shrink:0}
+.card img{width:100%;display:block;border-bottom:1px solid var(--border)}
+
+/* ── how-to box ── */
+.howto{padding:16px 18px}
+.howto-title{font-size:11px;font-weight:700;color:var(--accent-light);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.steps{list-style:none;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;font-size:13px;color:var(--text2);line-height:1.6}
+.step-num{min-width:20px;height:20px;background:var(--accent-dim);border:1px solid rgba(124,58,237,.3);color:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+.steps li strong{color:var(--text)}
+.steps li code{font-family:Menlo,Consolas,monospace;font-size:11.5px;background:var(--surface2);padding:1px 5px;border-radius:3px;color:#e8e8e8}
+
+/* ── tip / warning ── */
+.tip,.warn{display:flex;gap:10px;padding:10px 14px;border-radius:7px;font-size:12.5px;margin-top:12px;line-height:1.6}
+.tip{background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.18);color:#86efac}
+.warn{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);color:#fcd34d}
+.tip-icon,.warn-icon{flex-shrink:0;font-size:14px}
+
+/* ── divider ── */
+.divider{height:1px;background:var(--border);margin:36px 0}
+
+/* ── toc ── */
+.toc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:18px}
+.toc-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 13px;text-decoration:none;color:var(--text2);font-size:12.5px;display:flex;align-items:center;gap:8px;transition:.12s}
+.toc-item:hover{border-color:var(--accent);color:var(--text);background:var(--accent-dim)}
+.toc-num{font-size:10px;color:var(--text3);width:16px;text-align:center;flex-shrink:0}
+h2{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-header">
+    <div class="nav-logo">Rastreio Spectra</div>
+    <div class="nav-sub">Manual do Painel Admin</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-gtitle">Início</div>
+    <a href="#overview" class="nav-item">Índice</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-gtitle">Catálogo</div>
+    <a href="#produtos" class="nav-item">Produtos</a>
+    <a href="#alunos" class="nav-item">Alunos</a>
+    <a href="#relatorios" class="nav-item">Relatórios de Alunos</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-gtitle">Conteúdo</div>
+    <a href="#jornadas" class="nav-item">Jornadas</a>
+    <a href="#checkpoints" class="nav-item">Checkpoints</a>
+    <a href="#mapa-neuro" class="nav-item">Mapa Neuro</a>
+    <a href="#ia-contextual" class="nav-item">IA Contextual</a>
+    <a href="#audios" class="nav-item">Áudios</a>
+    <a href="#banners" class="nav-item">Banners</a>
+    <a href="#posts" class="nav-item">Posts da Área</a>
+    <a href="#trilhas-destaque" class="nav-item">Trilhas em Destaque</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-gtitle">Comunicação</div>
+    <a href="#email-marketing" class="nav-item">E-mail Marketing</a>
+    <a href="#whatsapp-sms" class="nav-item">WhatsApp &amp; SMS</a>
+    <a href="#comunidade" class="nav-item">Comunidade</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-gtitle">Clínica</div>
+    <a href="#profissionais" class="nav-item">Profissionais</a>
+    <a href="#agendamentos" class="nav-item">Agendamentos</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-gtitle">Sistema</div>
+    <a href="#integracoes" class="nav-item">Integrações</a>
+    <a href="#usuarios" class="nav-item">Usuários / Equipe</a>
+    <a href="#configuracoes" class="nav-item">Configurações</a>
+  </div>
+</nav>
+
+<main>
+
+<div class="page-header">
+  <h1>Manual do Painel Administrativo</h1>
+  <p>Guia prático com passo a passo de como usar cada funcionalidade do Rastreio Spectra. Siga as instruções de cada seção para configurar e operar a plataforma.</p>
+  <div class="badges">
+    <span class="badge b-purple">Rastreio Spectra</span>
+    <span class="badge b-green">19 módulos</span>
+    <span class="badge b-amber">35 telas</span>
+  </div>
+</div>
+
+<!-- ÍNDICE -->
+<section class="section" id="overview">
+  <h2>Módulos do Painel</h2>
+  <div class="toc-grid">
+    <a href="#produtos" class="toc-item"><span class="toc-num">01</span>Produtos</a>
+    <a href="#alunos" class="toc-item"><span class="toc-num">02</span>Alunos</a>
+    <a href="#relatorios" class="toc-item"><span class="toc-num">03</span>Relatórios</a>
+    <a href="#integracoes" class="toc-item"><span class="toc-num">04</span>Integrações</a>
+    <a href="#email-marketing" class="toc-item"><span class="toc-num">05</span>E-mail Marketing</a>
+    <a href="#profissionais" class="toc-item"><span class="toc-num">06</span>Profissionais</a>
+    <a href="#agendamentos" class="toc-item"><span class="toc-num">07</span>Agendamentos</a>
+    <a href="#jornadas" class="toc-item"><span class="toc-num">08</span>Jornadas</a>
+    <a href="#checkpoints" class="toc-item"><span class="toc-num">09</span>Checkpoints</a>
+    <a href="#mapa-neuro" class="toc-item"><span class="toc-num">10</span>Mapa Neuro</a>
+    <a href="#ia-contextual" class="toc-item"><span class="toc-num">11</span>IA Contextual</a>
+    <a href="#comunidade" class="toc-item"><span class="toc-num">12</span>Comunidade</a>
+    <a href="#whatsapp-sms" class="toc-item"><span class="toc-num">13</span>WhatsApp &amp; SMS</a>
+    <a href="#audios" class="toc-item"><span class="toc-num">14</span>Áudios</a>
+    <a href="#banners" class="toc-item"><span class="toc-num">15</span>Banners</a>
+    <a href="#posts" class="toc-item"><span class="toc-num">16</span>Posts da Área</a>
+    <a href="#trilhas-destaque" class="toc-item"><span class="toc-num">17</span>Trilhas em Destaque</a>
+    <a href="#usuarios" class="toc-item"><span class="toc-num">18</span>Usuários / Equipe</a>
+    <a href="#configuracoes" class="toc-item"><span class="toc-num">19</span>Configurações</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     PRODUTOS
+══════════════════════════════════════════════ -->
+<section class="section" id="produtos">
+  <div class="sec-header">
+    <div class="sec-icon">📦</div>
+    <div>
+      <div class="sec-title">Produtos</div>
+      <div class="sec-desc">Crie e gerencie cursos, trilhas e áreas de membros</div>
+      <div class="sec-url">/produtos</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Lista de Produtos</span>
+      <span class="card-url">/produtos</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7533).png" alt="Lista de produtos">
+    <div class="howto">
+      <div class="howto-title">Como criar um produto</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>No menu lateral, clique em <strong>Produtos</strong>.</li>
+        <li><span class="step-num">2</span>Clique no botão <strong>+ Novo produto</strong> no canto superior direito.</li>
+        <li><span class="step-num">3</span>Preencha o <strong>nome do produto</strong> e o <strong>slug do checkout</strong> (é a URL da página de vendas, ex: <code>neurociencia-tdah</code>).</li>
+        <li><span class="step-num">4</span>Adicione a <strong>descrição</strong> do produto.</li>
+        <li><span class="step-num">5</span>Escolha o <strong>tipo de cobrança</strong>: único (pagamento avulso) ou recorrente (assinatura).</li>
+        <li><span class="step-num">6</span>Defina o <strong>preço base</strong> e, se desejar, crie <strong>ofertas</strong> (pacotes com preços diferentes para o mesmo produto).</li>
+        <li><span class="step-num">7</span>Salve. O produto aparecerá na lista e você poderá adicionar módulos e aulas a ele.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Para ativar ou desativar um produto, use o toggle de status diretamente na listagem — sem precisar entrar na edição.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Editar Produto</span>
+      <span class="card-url">/produtos/{id}/editar</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7532).png" alt="Editar produto">
+    <div class="howto">
+      <div class="howto-title">Como criar ofertas (preços)</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Abra a edição de um produto e vá até a aba <strong>Ofertas</strong>.</li>
+        <li><span class="step-num">2</span>Clique em <strong>+ Nova oferta</strong> e defina nome, preço e tipo (único ou recorrente).</li>
+        <li><span class="step-num">3</span>Você pode criar múltiplas ofertas, ex.: <em>"Mensal R$ 49"</em>, <em>"Anual R$ 399"</em>, <em>"Vitalício R$ 997"</em>.</li>
+        <li><span class="step-num">4</span>No checkout, o aluno verá todas as ofertas ativas e escolherá qual contratar.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     ALUNOS
+══════════════════════════════════════════════ -->
+<section class="section" id="alunos">
+  <div class="sec-header">
+    <div class="sec-icon">👩‍🎓</div>
+    <div>
+      <div class="sec-title">Alunos</div>
+      <div class="sec-desc">Acompanhe e gerencie a base de alunos</div>
+      <div class="sec-url">/alunos</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Lista de Alunos</span>
+      <span class="card-url">/alunos</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7534).png" alt="Lista de alunos">
+    <div class="howto">
+      <div class="howto-title">Como adicionar um aluno manualmente</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Clique em <strong>Alunos</strong> no menu lateral.</li>
+        <li><span class="step-num">2</span>Clique em <strong>+ Novo aluno</strong> no canto superior direito.</li>
+        <li><span class="step-num">3</span>Preencha nome, e-mail e selecione o produto ao qual o aluno terá acesso.</li>
+        <li><span class="step-num">4</span>Salve. O aluno receberá o e-mail de acesso automaticamente (se o e-mail estiver configurado).</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Use a busca no topo da listagem para encontrar um aluno pelo nome ou e-mail rapidamente.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Perfil do Aluno</span>
+      <span class="card-url">/alunos/{id}</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7535).png" alt="Perfil do aluno">
+    <div class="howto">
+      <div class="howto-title">Como visualizar o progresso de um aluno</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Na lista de alunos, clique no nome do aluno desejado.</li>
+        <li><span class="step-num">2</span>Na página de perfil você verá: <strong>aulas assistidas</strong>, <strong>progresso por curso</strong> (barra percentual) e <strong>última atividade</strong>.</li>
+        <li><span class="step-num">3</span>Cada trilha em que o aluno está matriculado aparece separadamente com sua barra de progresso.</li>
+        <li><span class="step-num">4</span>Para revogar o acesso de um aluno, use o botão de ações no canto superior direito do perfil.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     RELATÓRIOS
+══════════════════════════════════════════════ -->
+<section class="section" id="relatorios">
+  <div class="sec-header">
+    <div class="sec-icon">📋</div>
+    <div>
+      <div class="sec-title">Relatórios de Alunos</div>
+      <div class="sec-desc">Solicitações de relatório de progresso geradas por IA</div>
+      <div class="sec-url">/member-reports</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Solicitações Pendentes</span>
+      <span class="card-url">/member-reports</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7556).png" alt="Relatórios de alunos">
+    <div class="howto">
+      <div class="howto-title">Como aprovar relatórios</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>No menu lateral, clique em <strong>Relatórios</strong>.</li>
+        <li><span class="step-num">2</span>Quando um aluno solicitar um relatório de progresso, ele aparecerá aqui como <strong>Pendente</strong>.</li>
+        <li><span class="step-num">3</span>Clique em <strong>Aprovar</strong> para liberar o relatório ao aluno, ou <strong>Rejeitar</strong> para negar.</li>
+        <li><span class="step-num">4</span>Para liberar todos os relatórios automaticamente, ative o toggle <strong>Aprovação automática</strong> no canto superior direito.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Com a aprovação automática ativa, o aluno recebe o relatório imediatamente após solicitá-lo, sem precisar esperar sua aprovação manual.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     INTEGRAÇÕES
+══════════════════════════════════════════════ -->
+<section class="section" id="integracoes">
+  <div class="sec-header">
+    <div class="sec-icon">🔌</div>
+    <div>
+      <div class="sec-title">Integrações</div>
+      <div class="sec-desc">Gateways de pagamento, LLMs e ferramentas externas</div>
+      <div class="sec-url">/integracoes</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Gateways de Pagamento</span>
+      <span class="card-url">/integracoes — aba Gateways</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7537).png" alt="Gateways">
+    <div class="howto">
+      <div class="howto-title">Como configurar um gateway de pagamento</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Integrações</strong> no menu e clique na aba <strong>Gateways</strong>.</li>
+        <li><span class="step-num">2</span>Escolha o gateway desejado (ex.: Mercado Pago, Stripe, Asaas) e clique em <strong>Configurar</strong>.</li>
+        <li><span class="step-num">3</span>Insira as <strong>chaves de API</strong> fornecidas pela plataforma do gateway (acesse o painel deles para obter as chaves).</li>
+        <li><span class="step-num">4</span>Salve. O gateway ficará marcado como <strong>Configurado</strong> e já estará disponível no checkout.</li>
+      </ol>
+      <div class="warn"><span class="warn-icon">⚠️</span>É necessário configurar pelo menos um gateway para processar pagamentos. Sem gateway ativo, o checkout não funciona.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Provedores de IA (LLM)</span>
+      <span class="card-url">/integracoes — aba LLM</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7538).png" alt="LLM">
+    <div class="howto">
+      <div class="howto-title">Como ativar a IA para os alunos</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Integrações → LLM</strong>.</li>
+        <li><span class="step-num">2</span>Escolha o provedor: <strong>OpenAI</strong>, <strong>Anthropic</strong>, <strong>Groq</strong> ou <strong>Google Gemini</strong>.</li>
+        <li><span class="step-num">3</span>Cole a <strong>API Key</strong> do provedor escolhido e salve.</li>
+        <li><span class="step-num">4</span>O chat de IA na área de membros ficará disponível automaticamente para os alunos.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>A OpenAI já está configurada. Para usar o Claude (Anthropic), adicione a chave em Anthropic e personalize os prompts em <a href="#ia-contextual" style="color:var(--accent-light)">IA Contextual</a>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Apps e Ferramentas</span>
+      <span class="card-url">/integracoes — aba Apps</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7536).png" alt="Apps">
+    <div class="howto">
+      <div class="howto-title">Como configurar um Webhook de saída</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Integrações → Apps</strong> e clique em <strong>Webhook</strong>.</li>
+        <li><span class="step-num">2</span>Insira a URL do sistema que deve receber as notificações.</li>
+        <li><span class="step-num">3</span>Selecione os eventos que disparam o webhook (ex.: nova compra, novo aluno, pagamento cancelado).</li>
+        <li><span class="step-num">4</span>Salve. A partir daí, cada evento enviará automaticamente um POST com os dados para a URL configurada.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     E-MAIL MARKETING
+══════════════════════════════════════════════ -->
+<section class="section" id="email-marketing">
+  <div class="sec-header">
+    <div class="sec-icon">✉️</div>
+    <div>
+      <div class="sec-title">E-mail Marketing</div>
+      <div class="sec-desc">Campanhas de e-mail segmentadas para seus alunos</div>
+      <div class="sec-url">/emails</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Campanhas de E-mail</span>
+      <span class="card-url">/emails</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7539).png" alt="E-mail Marketing">
+    <div class="howto">
+      <div class="howto-title">Como criar e enviar uma campanha de e-mail</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span><strong>Pré-requisito:</strong> configure o provedor de e-mail em <a href="#configuracoes" style="color:var(--accent-light)">Configurações → E-mail</a> (SMTP, Hostinger ou SendGrid).</li>
+        <li><span class="step-num">2</span>Acesse <strong>E-mail Marketing</strong> no menu e clique em <strong>+ Nova campanha</strong>.</li>
+        <li><span class="step-num">3</span>Defina o <strong>assunto</strong> do e-mail e escreva o <strong>conteúdo</strong>.</li>
+        <li><span class="step-num">4</span>Escolha a <strong>segmentação</strong>: todos os alunos, apenas compradores, inativos, etc.</li>
+        <li><span class="step-num">5</span>Clique em <strong>Enviar agora</strong> ou <strong>Agendar</strong> para definir data e hora de disparo.</li>
+      </ol>
+      <div class="warn"><span class="warn-icon">⚠️</span>Sem um provedor de e-mail configurado, o botão de envio não funcionará. Configure primeiro em Configurações → E-mail.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     PROFISSIONAIS
+══════════════════════════════════════════════ -->
+<section class="section" id="profissionais">
+  <div class="sec-header">
+    <div class="sec-icon">👨‍⚕️</div>
+    <div>
+      <div class="sec-title">Profissionais</div>
+      <div class="sec-desc">Especialistas disponíveis para agendamento pelos alunos</div>
+      <div class="sec-url">/profissionais</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Lista de Profissionais</span>
+      <span class="card-url">/profissionais</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7540).png" alt="Profissionais">
+    <div class="howto">
+      <div class="howto-title">Como cadastrar e aprovar um profissional</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Clique em <strong>Profissionais</strong> no menu e depois em <strong>+ Cadastrar profissional</strong>.</li>
+        <li><span class="step-num">2</span>Preencha o formulário: <strong>nome</strong>, <strong>especialidade</strong>, <strong>número de registro</strong> (CRO, CRM, etc.) e <strong>foto</strong>.</li>
+        <li><span class="step-num">3</span>Salve. O profissional ficará como <strong>Pendente</strong> na listagem.</li>
+        <li><span class="step-num">4</span>Clique em <strong>Aprovar</strong> para que o profissional apareça disponível na área de membros para agendamentos.</li>
+        <li><span class="step-num">5</span>Caso necessário, clique em <strong>Rejeitar</strong> para impedir que o profissional apareça para os alunos.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Cadastrar Profissional</span>
+      <span class="card-url">Modal — /profissionais</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7541).png" alt="Cadastrar profissional">
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     AGENDAMENTOS
+══════════════════════════════════════════════ -->
+<section class="section" id="agendamentos">
+  <div class="sec-header">
+    <div class="sec-icon">📅</div>
+    <div>
+      <div class="sec-title">Agendamentos</div>
+      <div class="sec-desc">Consultas agendadas pelos alunos com os profissionais</div>
+      <div class="sec-url">/agendamentos</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Calendário de Agendamentos</span>
+      <span class="card-url">/agendamentos</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7542).png" alt="Agendamentos">
+    <div class="howto">
+      <div class="howto-title">Como acompanhar os agendamentos</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Agendamentos</strong> no menu lateral para ver o calendário mensal.</li>
+        <li><span class="step-num">2</span>Os agendamentos feitos pelos alunos pela área de membros aparecem automaticamente no calendário.</li>
+        <li><span class="step-num">3</span>Clique em um agendamento para ver os detalhes: aluno, profissional, horário e status.</li>
+        <li><span class="step-num">4</span>Use as setas de navegação para avançar ou voltar entre os meses.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Para os alunos conseguirem agendar, é necessário ter pelo menos um profissional com status <strong>Aprovado</strong>.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     JORNADAS
+══════════════════════════════════════════════ -->
+<section class="section" id="jornadas">
+  <div class="sec-header">
+    <div class="sec-icon">🗺️</div>
+    <div>
+      <div class="sec-title">Jornadas</div>
+      <div class="sec-desc">Trilhas de aprendizado com etapas sequenciais e conteúdo próprio</div>
+      <div class="sec-url">/jornadas</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Lista de Jornadas</span>
+      <span class="card-url">/jornadas</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7543).png" alt="Jornadas">
+    <div class="howto">
+      <div class="howto-title">Como criar uma jornada</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Clique em <strong>Jornadas</strong> no menu e depois em <strong>+ Nova jornada</strong>.</li>
+        <li><span class="step-num">2</span>Defina o <strong>nome</strong> e a <strong>descrição</strong> da jornada (ex.: "Sono e Rotina").</li>
+        <li><span class="step-num">3</span>Salve e clique na jornada para abri-la e adicionar <strong>etapas</strong>.</li>
+        <li><span class="step-num">4</span>Em cada etapa, adicione <strong>conteúdos</strong>: vídeo (link YouTube), quiz ou questão aberta.</li>
+        <li><span class="step-num">5</span>Ordene as etapas arrastando para definir a sequência que o aluno seguirá.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>As jornadas são independentes dos cursos — um aluno pode estar em uma jornada sem precisar estar matriculado em um curso específico.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     CHECKPOINTS
+══════════════════════════════════════════════ -->
+<section class="section" id="checkpoints">
+  <div class="sec-header">
+    <div class="sec-icon">✅</div>
+    <div>
+      <div class="sec-title">Checkpoints</div>
+      <div class="sec-desc">Marcos de progresso dentro das etapas das jornadas</div>
+      <div class="sec-url">/checkpoints</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Lista de Checkpoints</span>
+      <span class="card-url">/checkpoints</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7544).png" alt="Checkpoints">
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Novo Checkpoint</span>
+      <span class="card-url">Modal — /checkpoints</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7545).png" alt="Novo checkpoint">
+    <div class="howto">
+      <div class="howto-title">Como criar um checkpoint</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Checkpoints</strong> e clique em <strong>+ Novo checkpoint</strong>.</li>
+        <li><span class="step-num">2</span>Defina o <strong>título</strong> (ex.: "Completou a meditação guiada") e a <strong>descrição</strong> do que o aluno deve fazer.</li>
+        <li><span class="step-num">3</span>Selecione a <strong>etapa de jornada</strong> à qual este checkpoint pertence.</li>
+        <li><span class="step-num">4</span>Salve. O checkpoint aparecerá para o aluno dentro da etapa correspondente na área de membros.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     MAPA NEURO
+══════════════════════════════════════════════ -->
+<section class="section" id="mapa-neuro">
+  <div class="sec-header">
+    <div class="sec-icon">🧠</div>
+    <div>
+      <div class="sec-title">Mapa Neurofuncional</div>
+      <div class="sec-desc">Avaliação do funcionamento cognitivo e emocional dos alunos</div>
+      <div class="sec-url">/mapa-neuro</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Áreas do Mapa</span>
+      <span class="card-url">/mapa-neuro</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7546).png" alt="Mapa Neuro">
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Nova Área</span>
+      <span class="card-url">Modal — /mapa-neuro</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7547).png" alt="Nova área mapa neuro">
+    <div class="howto">
+      <div class="howto-title">Como configurar o Mapa Neurofuncional</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Mapa Neuro</strong> e clique em <strong>+ Nova área</strong>.</li>
+        <li><span class="step-num">2</span>Defina o <strong>nome da área</strong> (ex.: "Atenção e Foco", "Regulação Emocional").</li>
+        <li><span class="step-num">3</span>Adicione uma <strong>descrição</strong> explicando o que essa área avalia.</li>
+        <li><span class="step-num">4</span>Escolha uma <strong>cor</strong> no seletor para identificar visualmente a área no mapa.</li>
+        <li><span class="step-num">5</span>Salve e repita para todas as dimensões que deseja avaliar.</li>
+        <li><span class="step-num">6</span>Os alunos preencherão o mapa na área de membros, e você poderá ver os resultados no perfil de cada um.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     IA CONTEXTUAL
+══════════════════════════════════════════════ -->
+<section class="section" id="ia-contextual">
+  <div class="sec-header">
+    <div class="sec-icon">🤖</div>
+    <div>
+      <div class="sec-title">IA Contextual</div>
+      <div class="sec-desc">Personalize o comportamento do assistente de IA e dos relatórios</div>
+      <div class="sec-url">/ia</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Novo Prompt</span>
+      <span class="card-url">/ia</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7548).png" alt="IA Contextual">
+    <div class="howto">
+      <div class="howto-title">Como personalizar o assistente de IA</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>IA Contextual</strong> no menu e clique em <strong>+ Novo prompt</strong>.</li>
+        <li><span class="step-num">2</span>Escolha o tipo: <strong>Chat / Assistente</strong> (como a IA se comporta no chat com o aluno) ou <strong>Relatórios avançados</strong> (como a IA analisa o progresso).</li>
+        <li><span class="step-num">3</span>No campo de texto, escreva as instruções para a IA. Exemplo para Chat: <em>"Nossa clínica atende adolescentes entre 14 e 22 anos. As recomendações devem sempre considerar o contexto acadêmico..."</em></li>
+        <li><span class="step-num">4</span>Clique em <strong>Salvar prompt</strong>. O prompt estará ativo imediatamente para todos os alunos.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Use o tipo <strong>Chat</strong> para dar personalidade e contexto ao assistente (nicho, tom, restrições). Use <strong>Relatórios avançados</strong> para definir como a IA deve interpretar e apresentar o progresso dos alunos.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     COMUNIDADE
+══════════════════════════════════════════════ -->
+<section class="section" id="comunidade">
+  <div class="sec-header">
+    <div class="sec-icon">🌐</div>
+    <div>
+      <div class="sec-title">Comunidade</div>
+      <div class="sec-desc">Posts, stories, eventos, grupos e moderação de denúncias</div>
+      <div class="sec-url">/comunidade-admin</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Posts da Comunidade</span>
+      <span class="card-url">/comunidade-admin</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7549).png" alt="Comunidade">
+    <div class="howto">
+      <div class="howto-title">Como criar um post na comunidade</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Comunidade</strong> e certifique-se de estar na aba <strong>Posts</strong>.</li>
+        <li><span class="step-num">2</span>No campo <strong>Selecione a página</strong>, escolha em qual produto/curso o post será publicado.</li>
+        <li><span class="step-num">3</span>Escreva o texto do post no campo <strong>Escreva o post…</strong></li>
+        <li><span class="step-num">4</span>Opcionalmente, adicione <strong>Foto</strong> ou <strong>Vídeo</strong> usando os botões abaixo do campo.</li>
+        <li><span class="step-num">5</span>Clique em <strong>Publicar</strong>. O post aparecerá imediatamente para os alunos do produto selecionado.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Use a aba <strong>Denúncias</strong> para moderar conteúdo impróprio reportado pelos alunos. A aba <strong>Grupos</strong> permite criar grupos temáticos dentro da comunidade.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     WHATSAPP & SMS
+══════════════════════════════════════════════ -->
+<section class="section" id="whatsapp-sms">
+  <div class="sec-header">
+    <div class="sec-icon">💬</div>
+    <div>
+      <div class="sec-title">WhatsApp &amp; SMS</div>
+      <div class="sec-desc">Campanhas de mensagens segmentadas para alunos</div>
+      <div class="sec-url">/mensagens</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Nova Campanha — Canal e Provedor</span>
+      <span class="card-url">/mensagens/criar</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7550).png" alt="Campanha WhatsApp">
+    <div class="howto">
+      <div class="howto-title">Como criar uma campanha de WhatsApp</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>WhatsApp &amp; SMS</strong> e clique em <strong>+ Nova campanha</strong>.</li>
+        <li><span class="step-num">2</span>Selecione o <strong>canal</strong>: WhatsApp ou SMS.</li>
+        <li><span class="step-num">3</span>Escolha o <strong>provedor</strong> (ex.: Z-API, Evolution API, Meta Cloud API). O provedor precisa estar configurado em <a href="#integracoes" style="color:var(--accent-light)">Integrações → Apps</a> antes.</li>
+        <li><span class="step-num">4</span>Defina o <strong>nome da campanha</strong> (uso interno, não aparece para o aluno).</li>
+        <li><span class="step-num">5</span>Escolha a <strong>segmentação</strong> dos destinatários (veja opções abaixo).</li>
+        <li><span class="step-num">6</span>Escreva a <strong>mensagem</strong> e clique em <strong>Enviar</strong> ou agende para uma data/hora futura.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Segmentação de Destinatários</span>
+      <span class="card-url">/mensagens/criar — segmentação</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7551).png" alt="Segmentação">
+    <div class="howto">
+      <div class="howto-title">Tipos de segmentação disponíveis</div>
+      <ol class="steps">
+        <li><span class="step-num">→</span><strong>Todos com acesso</strong> — qualquer aluno com acesso a algum produto.</li>
+        <li><span class="step-num">→</span><strong>Alunos de produto específico</strong> — somente alunos de uma trilha escolhida.</li>
+        <li><span class="step-num">→</span><strong>Compradores (pedido pago)</strong> — excluindo alunos adicionados manualmente.</li>
+        <li><span class="step-num">→</span><strong>Cadastrados sem compra</strong> — leads que nunca compraram (ótimo para reativação).</li>
+        <li><span class="step-num">→</span><strong>Inativos há N dias</strong> — não acessam a área de membros há X dias.</li>
+        <li><span class="step-num">→</span><strong>Progresso baixo/alto na trilha</strong> — segmenta por percentual concluído.</li>
+        <li><span class="step-num">→</span><strong>Assinantes ativos / cancelados</strong> — para gestão de recorrência.</li>
+        <li><span class="step-num">→</span><strong>Nunca acessaram a trilha</strong> — compraram mas nunca abriram uma aula.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     ÁUDIOS
+══════════════════════════════════════════════ -->
+<section class="section" id="audios">
+  <div class="sec-header">
+    <div class="sec-icon">🎵</div>
+    <div>
+      <div class="sec-title">Áudios</div>
+      <div class="sec-desc">Categorias e faixas de áudio disponíveis na área de membros</div>
+      <div class="sec-url">/musicas</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Categorias de Áudio</span>
+      <span class="card-url">/musicas</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7552).png" alt="Áudios">
+    <div class="howto">
+      <div class="howto-title">Como adicionar áudios</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Áudios</strong> e clique em <strong>+ Nova categoria</strong> para criar uma categoria (ex.: "Meditação", "Respiração").</li>
+        <li><span class="step-num">2</span>Com a categoria criada, clique no botão <strong>+</strong> ao lado dela para adicionar uma faixa.</li>
+        <li><span class="step-num">3</span>Faça o upload do arquivo de áudio e defina o título da faixa.</li>
+        <li><span class="step-num">4</span>Salve. Os áudios ficam disponíveis para os alunos na seção de áudios da área de membros.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     BANNERS
+══════════════════════════════════════════════ -->
+<section class="section" id="banners">
+  <div class="sec-header">
+    <div class="sec-icon">🖼️</div>
+    <div>
+      <div class="sec-title">Banners</div>
+      <div class="sec-desc">Imagens de destaque exibidas na plataforma</div>
+      <div class="sec-url">/banners</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Gerenciar Banners</span>
+      <span class="card-url">/banners</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7553).png" alt="Banners">
+    <div class="howto">
+      <div class="howto-title">Como criar e gerenciar banners</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Banners</strong> e clique em <strong>+ Novo banner</strong>.</li>
+        <li><span class="step-num">2</span>Faça o upload da imagem do banner e preencha o <strong>título</strong> e <strong>subtítulo</strong>.</li>
+        <li><span class="step-num">3</span>Defina onde o banner aparecerá: <strong>Área de Membros</strong>, <strong>Checkout</strong> ou <strong>Ambos</strong>.</li>
+        <li><span class="step-num">4</span>Opcionalmente, adicione um <strong>link de destino</strong> para onde o aluno será direcionado ao clicar.</li>
+        <li><span class="step-num">5</span>Salve. Para ativar ou desativar um banner sem excluí-lo, use o ícone de <strong>olho</strong> (visibilidade) na listagem.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     POSTS DA ÁREA
+══════════════════════════════════════════════ -->
+<section class="section" id="posts">
+  <div class="sec-header">
+    <div class="sec-icon">📝</div>
+    <div>
+      <div class="sec-title">Posts da Área</div>
+      <div class="sec-desc">Blog exibido na página inicial da área de membros</div>
+      <div class="sec-url">/member-posts</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Blog da Área de Membros</span>
+      <span class="card-url">/member-posts</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7554).png" alt="Posts da área">
+    <div class="howto">
+      <div class="howto-title">Como publicar um post no blog</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Posts da Área</strong> e clique em <strong>+ Novo post</strong>.</li>
+        <li><span class="step-num">2</span>Escreva o <strong>título</strong>, adicione uma <strong>imagem de capa</strong> e escreva o <strong>conteúdo</strong> do post.</li>
+        <li><span class="step-num">3</span>Clique em <strong>Publicar</strong>. O post aparecerá na home da área de membros para todos os alunos.</li>
+        <li><span class="step-num">4</span>Para tirar um post do ar temporariamente, clique em <strong>Despublicado</strong> — o post fica salvo mas invisível para os alunos.</li>
+        <li><span class="step-num">5</span>Para editar um post já publicado, clique em <strong>Editar</strong> no card do post.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     TRILHAS EM DESTAQUE
+══════════════════════════════════════════════ -->
+<section class="section" id="trilhas-destaque">
+  <div class="sec-header">
+    <div class="sec-icon">⭐</div>
+    <div>
+      <div class="sec-title">Trilhas em Destaque</div>
+      <div class="sec-desc">Trilhas exibidas em destaque na home da área de membros</div>
+      <div class="sec-url">/member-home-featured</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Seleção de Trilhas</span>
+      <span class="card-url">/member-home-featured</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7555).png" alt="Trilhas em destaque">
+    <div class="howto">
+      <div class="howto-title">Como definir as trilhas em destaque</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Trilhas em Destaque</strong> no menu.</li>
+        <li><span class="step-num">2</span>Clique nos cards das trilhas que deseja destacar na home. Um ícone de <strong>check ✓</strong> aparece no canto do card quando selecionado.</li>
+        <li><span class="step-num">3</span>Para remover do destaque, clique novamente no card para desmarcar.</li>
+        <li><span class="step-num">4</span>Clique em <strong>Salvar seleção</strong> no canto superior direito para aplicar as mudanças.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>As trilhas em destaque aparecem como carrossel ou grade na página inicial da área de membros, incentivando os alunos a explorarem mais conteúdo.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ══════════════════════════════════════════════
+     USUÁRIOS
+══════════════════════════════════════════════ -->
+<section class="section" id="usuarios">
+  <div class="sec-header">
+    <div class="sec-icon">👥</div>
+    <div>
+      <div class="sec-title">Usuários / Equipe</div>
+      <div class="sec-desc">Conta master e outros usuários administrativos</div>
+      <div class="sec-url">/usuarios</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Usuários Administrativos</span>
+      <span class="card-url">/usuarios</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7557).png" alt="Usuários">
+    <div class="howto">
+      <div class="howto-title">Como adicionar um usuário administrativo</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Usuários / Equipe</strong> no menu.</li>
+        <li><span class="step-num">2</span>Para adicionar outro admin com acesso total: clique em <strong>+ Novo infoprodutor</strong>.</li>
+        <li><span class="step-num">3</span>Para adicionar um colaborador com acesso limitado: clique na aba <strong>Equipe</strong> e depois em <strong>+ Novo membro</strong>.</li>
+        <li><span class="step-num">4</span>Preencha nome e e-mail. O usuário receberá um convite por e-mail para definir sua senha.</li>
+        <li><span class="step-num">5</span>Para editar os dados de um usuário existente, clique no ícone de lápis ao lado do nome.</li>
+      </ol>
+      <div class="warn"><span class="warn-icon">⚠️</span>Infoprodutores têm acesso completo ao painel. Adicione apenas pessoas de confiança neste nível. Para equipe com acesso parcial, use a aba <strong>Equipe</strong>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     CONFIGURAÇÕES
+══════════════════════════════════════════════ -->
+<section class="section" id="configuracoes">
+  <div class="sec-header">
+    <div class="sec-icon">⚙️</div>
+    <div>
+      <div class="sec-title">Configurações</div>
+      <div class="sec-desc">E-mail, storage, traduções, moedas, cron, área do aluno e white label</div>
+      <div class="sec-url">/configuracoes</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">E-mail — Configurar Provedor</span>
+      <span class="card-url">/configuracoes — aba E-MAIL</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7558).png" alt="Configurações E-mail">
+    <div class="howto">
+      <div class="howto-title">Como configurar o e-mail transacional</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Configurações → E-mail</strong>.</li>
+        <li><span class="step-num">2</span>Clique no ícone de engrenagem ⚙️ do provedor desejado (SMTP, Hostinger ou SendGrid).</li>
+        <li><span class="step-num">3</span>Preencha as credenciais (para SendGrid: cole a API Key; para SMTP: servidor, porta, usuário e senha).</li>
+        <li><span class="step-num">4</span>Clique em <strong>Salvar alterações</strong>. O provedor ficará marcado como <strong>Configurado</strong>.</li>
+      </ol>
+      <div class="warn"><span class="warn-icon">⚠️</span>Sem e-mail configurado, os alunos não recebem o e-mail de acesso após a compra, nem recuperação de senha funciona.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Storage de Arquivos</span>
+      <span class="card-url">/configuracoes — aba Storage</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7559).png" alt="Storage">
+    <div class="howto">
+      <div class="howto-title">Como mudar o armazenamento para S3/R2</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Configurações → Storage</strong>.</li>
+        <li><span class="step-num">2</span>Selecione o provedor desejado: <strong>AWS S3</strong>, <strong>Wasabi</strong> ou <strong>Cloudflare R2</strong>.</li>
+        <li><span class="step-num">3</span>Preencha as credenciais: Access Key, Secret Key, bucket e região.</li>
+        <li><span class="step-num">4</span>Clique em <strong>Salvar alterações</strong>. Novas imagens enviadas serão armazenadas no provedor escolhido.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Para produção com muitos arquivos, prefira Cloudflare R2 (sem custo de egress) ou AWS S3. O modo Local é adequado apenas para desenvolvimento.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Traduções do Checkout</span>
+      <span class="card-url">/configuracoes — aba Traduções</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7560).png" alt="Traduções">
+    <div class="howto">
+      <div class="howto-title">Como personalizar os textos do checkout</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Configurações → Traduções</strong>.</li>
+        <li><span class="step-num">2</span>Cada linha tem uma <strong>chave</strong> (identificador interno) e os campos de texto para <strong>PT-BR</strong>, <strong>English</strong> e <strong>Español</strong>.</li>
+        <li><span class="step-num">3</span>Edite o texto do idioma desejado diretamente no campo.</li>
+        <li><span class="step-num">4</span>Role até o final e clique em <strong>Salvar</strong> para aplicar as mudanças.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Moedas do Checkout</span>
+      <span class="card-url">/configuracoes — aba Moedas</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7561).png" alt="Moedas">
+    <div class="howto">
+      <div class="howto-title">Como adicionar e atualizar moedas</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Configurações → Moedas</strong>.</li>
+        <li><span class="step-num">2</span>Clique em <strong>Importar moedas internacionais</strong> para trazer o catálogo completo de moedas.</li>
+        <li><span class="step-num">3</span>Clique em <strong>Atualizar todas as taxas</strong> para buscar as cotações atuais via Frankfurter automaticamente.</li>
+        <li><span class="step-num">4</span>Para ajustar a taxa manualmente, edite o campo da moeda e clique no ícone de atualizar ↻.</li>
+        <li><span class="step-num">5</span>Salve. As moedas configuradas aparecerão como opção no checkout internacional.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Cron — Agendador</span>
+      <span class="card-url">/configuracoes — aba Cron</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7562).png" alt="Cron">
+    <div class="howto">
+      <div class="howto-title">Como configurar o Cron em hospedagem compartilhada</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Configurações → Cron</strong> e copie a <strong>URL do cron</strong> exibida na tela.</li>
+        <li><span class="step-num">2</span>Acesse um serviço como <strong>cron-job.org</strong> ou <strong>EasyCron</strong> e crie um novo job.</li>
+        <li><span class="step-num">3</span>Cole a URL copiada e configure para executar a <strong>cada 1 minuto</strong>.</li>
+        <li><span class="step-num">4</span>Salve o job. A partir daí, as rotinas automáticas (e-mails agendados, reconciliação de pagamentos, carrinho abandonado) funcionarão.</li>
+      </ol>
+      <div class="tip"><span class="tip-icon">💡</span>Se o servidor tem acesso SSH, use o comando exibido na aba <strong>CRON NO LINUX (CRONTAB)</strong> em vez de um serviço externo — é mais confiável.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Área do Aluno — Tema e Aparência</span>
+      <span class="card-url">/configuracoes — aba Área do Aluno</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7563).png" alt="Temas">
+    <div class="howto">
+      <div class="howto-title">Como personalizar a aparência da área de membros</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Configurações → Área do Aluno</strong>.</li>
+        <li><span class="step-num">2</span>Clique em um dos <strong>8 temas prontos</strong> para aplicar instantaneamente (Padrão, Oceano, Violeta, Âmbar, Esmeralda, Carvão, Rosa Neon, Safira).</li>
+        <li><span class="step-num">3</span>Role a página para baixo para ajustar cores individualmente: <strong>cor primária</strong>, fundo, superfícies, bordas e textos.</li>
+        <li><span class="step-num">4</span>Faça o upload do <strong>logo</strong> da sua marca (PNG/JPG/SVG/WebP, máx. 2 MB).</li>
+        <li><span class="step-num">5</span>Defina o <strong>Nome da área</strong> (aparece no cabeçalho e nos e-mails).</li>
+        <li><span class="step-num">6</span>Clique em <strong>Salvar alterações</strong> para aplicar.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Identidade e Cores</span>
+      <span class="card-url">/configuracoes — Identidade</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7564).png" alt="Identidade">
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">Navegação — Cores do Menu</span>
+      <span class="card-url">/configuracoes — Navegação</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7565).png" alt="Navegação">
+    <div class="howto">
+      <div class="howto-title">Como personalizar as cores do menu</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Na mesma página de Área do Aluno, role até a seção <strong>Navegação</strong>.</li>
+        <li><span class="step-num">2</span>Clique na cor de <strong>Fundo do menu lateral</strong> para abrir o seletor de cor e escolha a cor desejada.</li>
+        <li><span class="step-num">3</span>Ajuste também: <strong>Fundo do cabeçalho</strong>, <strong>Menu inferior mobile</strong>, <strong>Fundo do item ativo</strong> e <strong>Texto do item ativo</strong>.</li>
+        <li><span class="step-num">4</span>Cada campo tem uma prévia visual ao lado para você ver o resultado antes de salvar.</li>
+        <li><span class="step-num">5</span>Deixe um campo vazio para que ele herde a cor da superfície global configurada acima.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">
+      <span class="card-name">White Label</span>
+      <span class="card-url">/configuracoes — aba White Label</span>
+    </div>
+    <img src="prints-do-sistema/Captura de Tela (7566).png" alt="White Label">
+    <div class="howto">
+      <div class="howto-title">Como configurar o White Label</div>
+      <ol class="steps">
+        <li><span class="step-num">1</span>Acesse <strong>Configurações → White Label</strong>.</li>
+        <li><span class="step-num">2</span>Defina o <strong>Nome da aplicação</strong> — aparece no título da aba do navegador e nos e-mails.</li>
+        <li><span class="step-num">3</span>Configure a <strong>Cor primária</strong> da aplicação e a <strong>Cor do PWA</strong> (cor da barra do navegador quando instalado como app).</li>
+        <li><span class="step-num">4</span>Faça o upload do <strong>Logo para tema claro</strong> e do <strong>Logo para tema escuro</strong> separadamente — assim o logo fica legível em qualquer tema.</li>
+        <li><span class="step-num">5</span>Clique em <strong>Salvar</strong>. Valores em branco herdam o padrão global da plataforma.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const sections = document.querySelectorAll('.section[id]');
+const navItems = document.querySelectorAll('.nav-item');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(i => i.classList.remove('active'));
+      const a = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, {threshold: 0.15, rootMargin:'-5% 0px -75% 0px'});
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
