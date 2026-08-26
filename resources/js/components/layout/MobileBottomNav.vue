@@ -7,7 +7,7 @@ import { usePwaInstall } from '@/composables/usePwaInstall';
 const page = usePage();
 const { isStandalone } = usePwaInstall('painel');
 const appSettings = () => page.props.appSettings ?? {};
-const logoUrl = () => appSettings().app_logo_icon ?? 'https://cdn.getfy.cloud/collapsed-logo.png';
+const logoUrl = () => appSettings().app_logo_icon ?? '';
 
 const navItems = [
     { name: 'Home', href: '/dashboard', icon: LayoutDashboard },
@@ -92,6 +92,7 @@ onUnmounted(() => {
                 class="flex h-14 w-14 items-center justify-center rounded-full bg-zinc-700 shadow-lg shadow-black/30 ring-2 ring-zinc-500/60 dark:bg-zinc-600 dark:shadow-black/50 dark:ring-zinc-400/40"
             >
                 <img
+                    v-if="logoUrl()"
                     :src="logoUrl()"
                     alt=""
                     class="h-8 w-8 object-contain"

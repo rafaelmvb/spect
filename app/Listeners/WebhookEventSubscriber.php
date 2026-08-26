@@ -118,11 +118,11 @@ class WebhookEventSubscriber
 
     private function shouldDispatchSync(string $eventClass): bool
     {
-        if (config('getfy.webhooks.dispatch_all_sync', false)) {
+        if (config('spectra.webhooks.dispatch_all_sync', false)) {
             return true;
         }
 
-        if (config('getfy.webhooks.sync_critical_payment_events', true)
+        if (config('spectra.webhooks.sync_critical_payment_events', true)
             && in_array($eventClass, [OrderCompleted::class, OrderPending::class], true)) {
             return true;
         }

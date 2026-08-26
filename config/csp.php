@@ -8,8 +8,8 @@ return [
     'extra_connect_src' => env('CSP_EXTRA_CONNECT_SRC', ''),
 
     /*
-    | Incluir https://r2.getfy.cloud em connect-src (storage público Getfy Cloud).
+    | Origens extras em connect-src, para PDF.js buscar arquivo em storage externo.
     | Defina true em instalações self-hosted que não usem esse domínio.
     */
-    'disable_getfy_r2_origin' => filter_var(env('CSP_DISABLE_GETFY_R2_ORIGIN', false), FILTER_VALIDATE_BOOL),
+    'disable_legacy_r2_origin' => filter_var(env('CSP_DISABLE_LEGACY_R2_ORIGIN', false), FILTER_VALIDATE_BOOL),
 ];

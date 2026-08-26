@@ -21,10 +21,10 @@ class PluginRegistry
     /**
      * Pasta persistente para instalações via ZIP/loja.
      *
-     * Em Docker (GETFY_DOCKER=true): `.docker/plugins-installed` — fica no volume `getfy_env` montado em `.docker/`,
+     * Em Docker (SPECTRA_DOCKER=true): `.docker/plugins-installed` — fica no volume de ambiente montado em `.docker/`,
      * independente de `storage/` (útil quando o update do contentor recria ou substitui dados em storage).
      * Fora de Docker: {@see storage_path}('app/plugins-installed').
-     * Override absoluto: GETFY_PLUGINS_USER_PATH no .env.
+     * Override absoluto: SPECTRA_PLUGINS_USER_PATH no .env.
      */
     public static function userInstallRoot(): string
     {
@@ -52,21 +52,21 @@ class PluginRegistry
                 File::makeDirectory($destRoot, 0755, true);
             }
 
-            $markerProjectRoot = storage_path('app/.getfy-migrated-plugins-from-project-root');
+            $markerProjectRoot = storage_path('app/.spectra-migrated-plugins-from-project-root');
             if (! is_file($markerProjectRoot)) {
                 self::migratePluginSubdirsIfPresent(rtrim(base_path('plugins-installed'), '/\\'), $destRoot);
                 @file_put_contents($markerProjectRoot, (string) time());
             }
 
             if (config('plugins.docker_mode')) {
-                $markerFromStorage = base_path('.docker/.getfy-migrated-plugins-from-storage-app');
+                $markerFromStorage = base_path('.docker/.spectra-migrated-plugins-from-storage-app');
                 if (! is_file($markerFromStorage)) {
                     self::migratePluginSubdirsIfPresent(rtrim(storage_path('app/plugins-installed'), '/\\'), $destRoot);
                     @file_put_contents($markerFromStorage, (string) time());
                 }
             }
         } catch (\Throwable $e) {
-            Log::warning('Getfy: migração de pasta legacy de plugins falhou.', [
+            Log::warning('Spectra: migração de pasta legacy de plugins falhou.', [
                 'message' => $e->getMessage(),
             ]);
         }

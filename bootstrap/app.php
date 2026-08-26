@@ -71,7 +71,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Fallback: se der erro por tabela/view inexistente e APP_AUTO_MIGRATE=true, roda migrate e redireciona para tentar de novo
         $exceptions->render(function (\Throwable $e, Request $request) {
-            if (! $request->expectsJson() && filter_var(config('getfy.auto_migrate', false), FILTER_VALIDATE_BOOLEAN)) {
+            if (! $request->expectsJson() && filter_var(config('spectra.auto_migrate', false), FILTER_VALIDATE_BOOLEAN)) {
                 $message = $e->getMessage();
                 $isTableMissing = $e instanceof QueryException
                     || str_contains($message, '42S02')

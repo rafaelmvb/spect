@@ -22,7 +22,7 @@ class OrderCompletedTrackingTest extends TestCase
         Bus::fake();
 
         config(['queue.default' => 'redis']);
-        config(['getfy.integrations.dispatch_after_response' => false]);
+        config(['spectra.integrations.dispatch_after_response' => false]);
 
         $user = User::factory()->create(['tenant_id' => 1]);
         $product = $this->createTestProduct();
@@ -47,7 +47,7 @@ class OrderCompletedTrackingTest extends TestCase
         Bus::fake();
 
         config(['queue.default' => 'sync']);
-        config(['getfy.integrations.dispatch_after_response' => false]);
+        config(['spectra.integrations.dispatch_after_response' => false]);
 
         $user = User::factory()->create(['tenant_id' => 1]);
         $product = $this->createTestProduct();
@@ -124,7 +124,7 @@ class OrderCompletedTrackingTest extends TestCase
         Bus::fake();
 
         config(['queue.default' => 'sync']);
-        config(['getfy.integrations.dispatch_after_response' => true]);
+        config(['spectra.integrations.dispatch_after_response' => true]);
 
         $user = User::factory()->create(['tenant_id' => 1]);
         $product = $this->createTestProduct();

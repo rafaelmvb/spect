@@ -381,7 +381,7 @@ async function onPaymentApproved(payload) {
         order_id: orderId,
         amount: Number(payload.amount) || 0,
         currency: typeof payload.currency === 'string' && payload.currency ? payload.currency : 'BRL',
-        meta_event_id: typeof payload.meta_event_id === 'string' ? payload.meta_event_id : `getfy_purchase_${orderId}`,
+        meta_event_id: typeof payload.meta_event_id === 'string' ? payload.meta_event_id : `spectra_purchase_${orderId}`,
         purchase_contents: Array.isArray(payload.purchase_contents) ? payload.purchase_contents : [],
     };
     pendingPurchase.value = purchasePayload;
@@ -421,7 +421,7 @@ const hasCustomBodyEnd = computed(() => String(customBodyEndHtml.value).trim() !
         <link rel="icon" :href="faviconHref" />
     </Head>
     <div
-        id="getfy-checkout-root"
+        id="spectra-checkout-root"
         data-checkout="page"
         class="min-h-screen transition-colors duration-300"
         :style="{ backgroundColor }"
@@ -430,7 +430,7 @@ const hasCustomBodyEnd = computed(() => String(customBodyEndHtml.value).trim() !
 
         <div
             v-if="hasCustomBodyStart"
-            class="getfy-checkout-custom-body-start"
+            class="spectra-checkout-custom-body-start"
             data-checkout="custom-html-body-start"
             v-html="customBodyStartHtml"
         />
@@ -575,7 +575,7 @@ const hasCustomBodyEnd = computed(() => String(customBodyEndHtml.value).trim() !
 
         <div
             v-if="hasCustomBodyEnd"
-            class="getfy-checkout-custom-body-end"
+            class="spectra-checkout-custom-body-end"
             data-checkout="custom-html-body-end"
             v-html="customBodyEndHtml"
         />

@@ -53,6 +53,8 @@ class SendApiApplicationWebhookJob implements ShouldQueue
 
         if ($app->webhook_secret !== null && $app->webhook_secret !== '') {
             $signature = hash_hmac('sha256', $body, $app->webhook_secret);
+            $headers['X-Spectra-Signature'] = $signature;
+            // Header antigo mantido enquanto houver integração validando por ele.
             $headers['X-Getfy-Signature'] = $signature;
         }
 

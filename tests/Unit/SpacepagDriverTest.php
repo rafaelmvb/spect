@@ -150,7 +150,7 @@ class SpacepagDriverTest extends TestCase
             [
                 'name' => 'Consumidor',
                 'document' => '35401338287',
-                'email' => 'getfycloud@gmail.com',
+                'email' => 'comprador@example.test',
                 'phone' => '91985134037',
             ],
             '107',

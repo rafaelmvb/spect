@@ -35,7 +35,7 @@ const ATTRIBUTION_PARAM_KEYS = [
 ];
 
 function utmStorageKey() {
-    return `getfy_checkout_utm_${String(props.productId)}`;
+    return `spectra_checkout_utm_${String(props.productId)}`;
 }
 
 function readUtmsFromUrl() {
@@ -116,9 +116,9 @@ function appendCheckoutSecurity(payload) {
 const checkoutIdempotencyStorageKey = computed(() => {
     const token = String(props.checkoutSessionToken || '').trim();
     if (token) {
-        return `getfy_checkout_idem_sess_${token}`;
+        return `spectra_checkout_idem_sess_${token}`;
     }
-    return `getfy_checkout_idem_prod_${props.productId}`;
+    return `spectra_checkout_idem_prod_${props.productId}`;
 });
 
 function getCheckoutIdempotencyKey() {
@@ -1259,7 +1259,7 @@ async function pollCajuPayOrderStatus() {
                 const metaId =
                     typeof data.meta_purchase_event_id === 'string' && data.meta_purchase_event_id
                         ? data.meta_purchase_event_id
-                        : `getfy_purchase_${oid}`;
+                        : `spectra_purchase_${oid}`;
                 const contents =
                     Array.isArray(data.purchase_contents) && data.purchase_contents.length > 0
                         ? data.purchase_contents
@@ -1887,7 +1887,7 @@ async function getEfiPaymentToken() {
 }
 
 /**
- * Cria a Order pendente no Getfy (draft → pedido). Idempotente se já materializado com o mesmo polling_token.
+ * Cria a Order pendente no Spectra (draft → pedido). Idempotente se já materializado com o mesmo polling_token.
  */
 async function postCajuPayConfirmOrder() {
     const pollingToken = cajupayPollingToken.value;
@@ -2286,7 +2286,7 @@ function submit() {
                             const metaId =
                                 typeof data.meta_purchase_event_id === 'string' && data.meta_purchase_event_id
                                     ? data.meta_purchase_event_id
-                                    : `getfy_purchase_${data.order_id}`;
+                                    : `spectra_purchase_${data.order_id}`;
                             const contents =
                                 Array.isArray(data.purchase_contents) && data.purchase_contents.length > 0
                                     ? data.purchase_contents
@@ -2317,7 +2317,7 @@ function submit() {
                             const metaId =
                                 typeof data.meta_purchase_event_id === 'string' && data.meta_purchase_event_id
                                     ? data.meta_purchase_event_id
-                                    : `getfy_purchase_${data.order_id}`;
+                                    : `spectra_purchase_${data.order_id}`;
                             const contents =
                                 Array.isArray(data.purchase_contents) && data.purchase_contents.length > 0
                                     ? data.purchase_contents
@@ -2351,7 +2351,7 @@ function submit() {
                         const metaId =
                             typeof data.meta_purchase_event_id === 'string' && data.meta_purchase_event_id
                                 ? data.meta_purchase_event_id
-                                : `getfy_purchase_${data.order_id}`;
+                                : `spectra_purchase_${data.order_id}`;
                         const contents =
                             Array.isArray(data.purchase_contents) && data.purchase_contents.length > 0
                                 ? data.purchase_contents

@@ -1,4 +1,4 @@
-const PURCHASE_FIRED_PREFIX = 'getfy_purchase_fired_';
+const PURCHASE_FIRED_PREFIX = 'spectra_purchase_fired_';
 
 export function purchaseFiredStorageKey(orderId) {
     return `${PURCHASE_FIRED_PREFIX}${orderId}`;
@@ -68,7 +68,7 @@ export async function firePurchaseWhenReady(pixelsApi, payload, options = {}) {
     const metaEventId =
         typeof payload.meta_event_id === 'string' && payload.meta_event_id.trim()
             ? payload.meta_event_id.trim()
-            : `getfy_purchase_${orderId}`;
+            : `spectra_purchase_${orderId}`;
     const contents = Array.isArray(payload.purchase_contents) ? payload.purchase_contents : [];
 
     pixelsApi.firePurchase(amount, currency, String(orderId), false, 'approved', {

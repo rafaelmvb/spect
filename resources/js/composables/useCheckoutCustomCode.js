@@ -5,8 +5,8 @@
 
 import { watch, onUnmounted } from 'vue';
 
-const STYLE_ID = 'getfy-checkout-custom-css';
-const SCRIPT_ID = 'getfy-checkout-custom-js';
+const STYLE_ID = 'spectra-checkout-custom-css';
+const SCRIPT_ID = 'spectra-checkout-custom-js';
 
 /**
  * @param {import('vue').Ref<object>|import('vue').ComputedRef<object>} advancedSource ex.: computed(() => effectiveConfig.value?.advanced ?? {})
@@ -64,7 +64,7 @@ export function useCheckoutCustomCode(advancedSource) {
         if (!t) return;
         const s = document.createElement('script');
         s.id = SCRIPT_ID;
-        s.setAttribute('data-getfy-custom', '1');
+        s.setAttribute('data-spectra-custom', '1');
         s.textContent = js;
         document.body.appendChild(s);
     }

@@ -14,7 +14,7 @@ let widgetId = null;
 function loadTurnstileScript() {
     if (typeof window === 'undefined') return Promise.resolve();
     if (window.turnstile) return Promise.resolve();
-    if (document.querySelector('script[data-getfy-turnstile]')) {
+    if (document.querySelector('script[data-spectra-turnstile]')) {
         return new Promise((resolve) => {
             const check = () => (window.turnstile ? resolve() : setTimeout(check, 50));
             check();
@@ -25,7 +25,7 @@ function loadTurnstileScript() {
         scriptEl.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
         scriptEl.async = true;
         scriptEl.defer = true;
-        scriptEl.setAttribute('data-getfy-turnstile', '1');
+        scriptEl.setAttribute('data-spectra-turnstile', '1');
         scriptEl.onload = () => resolve();
         scriptEl.onerror = () => reject(new Error('turnstile_load_failed'));
         document.head.appendChild(scriptEl);

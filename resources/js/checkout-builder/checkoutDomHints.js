@@ -3,7 +3,7 @@
  * @type {import('@codemirror/autocomplete').Completion[]}
  */
 export const checkoutDomCompletions = [
-    { label: '#getfy-checkout-root', type: 'constant', info: 'Página inteira (fundo)' },
+    { label: '#spectra-checkout-root', type: 'constant', info: 'Página inteira (fundo)' },
     { label: '[data-checkout="page"]', type: 'constant', info: 'Equivale ao root' },
     { label: '[data-checkout="layout-inner"]', type: 'constant', info: 'Container central (max-width)' },
     { label: '[data-checkout="layout-columns"]', type: 'constant', info: 'Grid 2 colunas (principal + sidebar)' },
@@ -59,6 +59,6 @@ export const checkoutDomCompletions = [
     { label: '[data-checkout="conversion-pixels"]', type: 'constant', info: 'Container de pixels (oculto)' },
     { label: '[data-checkout="custom-html-body-start"]', type: 'constant', info: 'HTML custom início' },
     { label: '[data-checkout="custom-html-body-end"]', type: 'constant', info: 'HTML custom fim' },
-    { label: '.getfy-checkout-custom-body-start', type: 'constant', info: 'Wrapper HTML início (classe)' },
-    { label: '.getfy-checkout-custom-body-end', type: 'constant', info: 'Wrapper HTML fim (classe)' },
+    { label: '.spectra-checkout-custom-body-start', type: 'constant', info: 'Wrapper HTML início (classe)' },
+    { label: '.spectra-checkout-custom-body-end', type: 'constant', info: 'Wrapper HTML fim (classe)' },
 ];

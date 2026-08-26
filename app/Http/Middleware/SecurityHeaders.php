@@ -57,11 +57,6 @@ class SecurityHeaders
     {
         $origins = [];
 
-        // Domínio público típico do R2 na Getfy Cloud — PDF.js faz fetch a este host mesmo sem AWS_URL no .env da app.
-        if (! config('csp.disable_getfy_r2_origin', false)) {
-            $origins[] = 'https://r2.getfy.cloud';
-        }
-
         $csv = (string) config('csp.extra_connect_src', '');
         if ($csv !== '') {
             foreach (explode(',', $csv) as $part) {

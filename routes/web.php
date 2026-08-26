@@ -28,7 +28,13 @@ Route::post('/docker-setup', [\App\Http\Controllers\DockerSetupController::class
 
 // Favicon: evita 404 no console quando o navegador solicita /favicon.ico
 Route::get('/favicon.ico', function () {
-    return redirect('https://cdn.getfy.cloud/collapsed-logo.png', 302);
+    $arquivo = public_path('favicon.ico');
+    if (is_file($arquivo) && filesize($arquivo) > 0) {
+        return response()->file($arquivo, ['Content-Type' => 'image/x-icon']);
+    }
+
+    // 204 em vez de 404: o browser para de pedir e o console fica limpo.
+    return response()->noContent();
 });
 
 // PWA Painel: manifest e service worker
@@ -83,7 +89,7 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
 });
 
 Route::get('/cron', function () {
-    $secret = config('getfy.cron_secret');
+    $secret = config('spectra.cron_secret');
     $token = request()->query('token');
     if (! $secret || $token !== $secret) {
         abort(404);

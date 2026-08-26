@@ -30,7 +30,7 @@ async function onConversionPixelsReady() {
     const api = conversionPixelsRef.value;
     const cur = (props.order_currency || 'BRL').toUpperCase();
     const eid =
-        (props.meta_purchase_event_id || '').trim() || `getfy_purchase_${props.order_id}`;
+        (props.meta_purchase_event_id || '').trim() || `spectra_purchase_${props.order_id}`;
     await firePurchaseWhenReady(api, {
         order_id: props.order_id,
         amount: props.order_amount,

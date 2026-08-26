@@ -10,10 +10,10 @@ const flashError = computed(() => page.props.flash?.error ?? null);
 
 const branding = computed(() => page.props.public_branding ?? {});
 const primary = computed(() => branding.value.theme_primary || '#c8fa64');
-const appName = computed(() => branding.value.app_name || 'Getfy');
-const logoLight = computed(() => branding.value.app_logo_icon || 'https://cdn.getfy.cloud/collapsed-logo.png');
+const appName = computed(() => branding.value.app_name || 'Spectra');
+const logoLight = computed(() => branding.value.app_logo_icon || '');
 const logoDark = computed(() => branding.value.app_logo_icon_dark || logoLight.value);
-const heroImage = computed(() => branding.value.login_hero_image || 'https://cdn.getfy.cloud/login.webp');
+const heroImage = computed(() => branding.value.login_hero_image || '');
 
 const form = useForm({
     email: '',
@@ -34,6 +34,7 @@ function submit() {
         <div class="flex w-full flex-col justify-center px-8 py-12 lg:w-[30%] lg:min-w-[360px]">
             <div class="text-center">
                 <img
+                    v-if="logoLight"
                     :src="logoLight"
                     :alt="appName"
                     class="mx-auto mb-10 h-12 w-auto object-contain dark:hidden"
@@ -126,7 +127,7 @@ function submit() {
                     background: `linear-gradient(to bottom right, color-mix(in srgb, ${primary} 20%, transparent), transparent, rgba(14, 165, 233, 0.1))`,
                 }"
             />
-            <img :src="heroImage" alt="" class="absolute inset-0 h-full w-full object-cover" />
+            <img v-if="heroImage" :src="heroImage" alt="" class="absolute inset-0 h-full w-full object-cover" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/25 via-black/5 to-transparent" />
         </div>
     </div>

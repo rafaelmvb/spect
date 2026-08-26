@@ -6,7 +6,7 @@ use App\Models\Order;
 
 class MetaPurchaseTracking
 {
-    public const EVENT_ID_PREFIX = 'getfy_purchase_';
+    public const EVENT_ID_PREFIX = 'spectra_purchase_';
 
     public static function purchaseEventId(int $orderId): string
     {

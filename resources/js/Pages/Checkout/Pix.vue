@@ -94,7 +94,7 @@ function buildPurchasePayloadFromStatus(data) {
         meta_event_id:
             typeof data?.meta_purchase_event_id === 'string' && data.meta_purchase_event_id
                 ? data.meta_purchase_event_id
-                : (props.meta_purchase_event_id || '').trim() || `getfy_purchase_${oid}`,
+                : (props.meta_purchase_event_id || '').trim() || `spectra_purchase_${oid}`,
         purchase_contents:
             Array.isArray(data?.purchase_contents) && data.purchase_contents.length > 0
                 ? data.purchase_contents

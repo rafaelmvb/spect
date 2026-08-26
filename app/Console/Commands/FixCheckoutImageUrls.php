@@ -26,7 +26,7 @@ class FixCheckoutImageUrls extends Command
             $appUrl = (string) env('APP_URL', '');
             $host = parse_url($appUrl, PHP_URL_HOST);
             if (! $host) {
-                $this->error('Não consegui extrair host de APP_URL. Use --from=getfy-opensource.test');
+                $this->error('Não consegui extrair host de APP_URL. Use --from=spectra.test');
                 return self::FAILURE;
             }
             $from = $host;

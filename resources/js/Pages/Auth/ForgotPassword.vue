@@ -7,8 +7,8 @@ const page = usePage();
 const status = computed(() => page.props.flash?.status ?? null);
 const branding = computed(() => page.props.public_branding ?? {});
 const primary = computed(() => branding.value.theme_primary || '#c8fa64');
-const appName = computed(() => branding.value.app_name || 'Getfy');
-const logoLight = computed(() => branding.value.app_logo_icon || 'https://cdn.getfy.cloud/collapsed-logo.png');
+const appName = computed(() => branding.value.app_name || 'Spectra');
+const logoLight = computed(() => branding.value.app_logo_icon || '');
 const logoDark = computed(() => branding.value.app_logo_icon_dark || logoLight.value);
 
 const form = useForm({

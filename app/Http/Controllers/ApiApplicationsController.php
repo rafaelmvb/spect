@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class ApiApplicationsController extends Controller
 {
-    private const WEBHOOK_SECRET_MASK = '__getfy_masked_webhook_secret__';
+    private const WEBHOOK_SECRET_MASK = '__spectra_masked_webhook_secret__';
 
     /**
      * @return array<int, array<string, mixed>>
@@ -134,7 +134,7 @@ class ApiApplicationsController extends Controller
         ]);
 
         $slug = ApiApplication::generateUniqueSlug($tenantId, $validated['name']);
-        $plainKey = 'getfy_' . Str::random(12) . '_' . Str::random(32);
+        $plainKey = 'spectra_' . Str::random(12) . '_' . Str::random(32);
         $apiKeyHash = ApiApplication::hashApiKey($plainKey);
 
         $pg = $validated['payment_gateways'] ?? [];
@@ -302,7 +302,7 @@ class ApiApplicationsController extends Controller
     public function regenerateKey(ApiApplication $apiApplication): RedirectResponse
     {
         $this->authorizeTenant($apiApplication);
-        $plainKey = 'getfy_' . Str::random(12) . '_' . Str::random(32);
+        $plainKey = 'spectra_' . Str::random(12) . '_' . Str::random(32);
         $apiApplication->update(['api_key_hash' => ApiApplication::hashApiKey($plainKey)]);
 
         return redirect()

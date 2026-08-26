@@ -36,13 +36,13 @@ class SettingsController extends Controller
 
         $gitAvailable = is_dir(base_path('.git'));
         $dockerMode = DockerSetupState::isDocker();
-        $cronSecret = config('getfy.cron_secret');
+        $cronSecret = config('spectra.cron_secret');
         $appUrl = rtrim(config('app.url'), '/');
         $cronUrl = $cronSecret ? $appUrl . '/cron?token=' . urlencode((string) $cronSecret) : null;
         $versionFile = base_path('VERSION');
         $currentVersion = trim((is_file($versionFile) ? (string) file_get_contents($versionFile) : '') ?: '');
         if ($currentVersion === '') {
-            $currentVersion = (string) config('getfy.version');
+            $currentVersion = (string) config('spectra.version');
         }
 
         $storageProviderSetting = Setting::get('storage_provider', null, $tenantId);
@@ -166,7 +166,7 @@ class SettingsController extends Controller
                 continue;
             }
             if (in_array($key, $brandingKeys, true)) {
-                continue; // branding hardcoded in config/getfy.php - never save
+                continue; // branding hardcoded in config/spectra.php - never save
             }
 
             if (in_array($key, $alwaysSetKeys, true) || in_array($key, $emailKeys, true)) {

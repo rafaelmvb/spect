@@ -87,7 +87,7 @@ const META_FBEvents_URL = 'https://connect.facebook.net/en_US/fbevents.js';
 
 /** Evita segundo <script> se o checkout ou um script personalizado já carregou fbevents.js. */
 function findExistingFbeventsScript() {
-    const tagged = document.querySelector('script[data-getfy-fbevents="1"]');
+    const tagged = document.querySelector('script[data-spectra-fbevents="1"]');
     if (tagged) return tagged;
     const scripts = document.querySelectorAll('script[src]');
     for (let i = 0; i < scripts.length; i++) {
@@ -159,11 +159,11 @@ function injectMetaLibAndInit(metaEntries) {
     const s = document.createElement('script');
     s.async = true;
     s.src = META_FBEvents_URL;
-    s.setAttribute('data-getfy-fbevents', '1');
+    s.setAttribute('data-spectra-fbevents', '1');
     s.onerror = () => {
         if (import.meta.env.DEV) {
             console.warn(
-                '[Getfy][Meta Pixel] Falha ao carregar fbevents.js. Causas comuns: extensão bloqueando connect.facebook.net (ERR_BLOCKED_BY_CLIENT), rede ou firewall.'
+                '[Spectra][Meta Pixel] Falha ao carregar fbevents.js. Causas comuns: extensão bloqueando connect.facebook.net (ERR_BLOCKED_BY_CLIENT), rede ou firewall.'
             );
         }
     };
@@ -379,7 +379,7 @@ defineExpose({
             typeof extra?.eventId === 'string' && extra.eventId.trim() !== ''
                 ? extra.eventId.trim()
                 : orderId
-                  ? `getfy_purchase_${orderId}`
+                  ? `spectra_purchase_${orderId}`
                   : '';
 
         if (p.meta?.enabled && window.fbq) {

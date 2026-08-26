@@ -13,8 +13,8 @@ class SafeRemoteUrlTest extends TestCase
         $this->assertFalse(SafeRemoteUrl::isAllowedHttpUrl('http://169.254.169.254/latest/meta-data'));
     }
 
-    public function test_allows_r2_getfy_host(): void
+    public function test_bloqueia_host_fora_da_allowlist(): void
     {
-        $this->assertTrue(SafeRemoteUrl::isAllowedHttpUrl('https://r2.getfy.cloud/bucket/file.pdf'));
+        $this->assertFalse(SafeRemoteUrl::isAllowedHttpUrl('https://host-qualquer.example/bucket/file.pdf'));
     }
 }

@@ -50,7 +50,7 @@ class AppServiceProvider extends ServiceProvider
         // Override de URL pública (ngrok, cloudflared, tunnels de dev) — quando setada, força
         // todas as URLs (url(), route(), redirect(), asset/Vite) e o cookie de sessão a usarem
         // esse host. Útil quando o tunnel reescreve o header Host (ex.: ngrok --host-header)
-        // e o Apache local atende por outro vhost (ex.: getfy-opensource.test). Sem isso o
+        // e o Apache local atende por outro vhost (ex.: spectra.test). Sem isso o
         // navegador é redirecionado de volta para o vhost local.
         $publicOverride = trim((string) env('PUBLIC_URL_OVERRIDE', ''));
         if ($publicOverride !== '') {
@@ -208,8 +208,8 @@ class AppServiceProvider extends ServiceProvider
      */
     private function resolveWhiteLabelEmailBranding(object $notifiable): array
     {
-        $defaultName = (string) config('app.name', 'Getfy');
-        $defaultLogo = 'https://cdn.getfy.cloud/logo-white.png';
+        $defaultName = (string) config('app.name', 'Spectra');
+        $defaultLogo = (string) config('spectra.app_logo', '') ?: null;
 
         try {
             $enabled = collect(PluginRegistry::enabled())->contains(fn ($p) => ($p['slug'] ?? null) === 'white-label');

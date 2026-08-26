@@ -82,7 +82,7 @@ class RefundFlowTest extends TestCase
             'mode' => RefundRequest::MODE_AUTO,
             'gateway' => 'cajupay',
             'cajupay_payment_id' => $paymentId,
-            'client_refund_id' => 'getfy-order-'.$order->id.'-refund',
+            'client_refund_id' => 'spectra-order-'.$order->id.'-refund',
         ]);
 
         $credential = new GatewayCredential([

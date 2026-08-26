@@ -129,7 +129,7 @@ class RefundService
         $mode = $config['mode'];
         $canAutoPix = $mode === RefundRequest::MODE_AUTO && $this->canExecuteCajuPayPixRefund($order);
 
-        $clientRefundId = 'getfy-order-'.$order->id.'-refund';
+        $clientRefundId = 'spectra-order-'.$order->id.'-refund';
         $paymentId = $this->cajuPayDriver->resolvePaymentIdForOrder($order);
 
         $request = RefundRequest::create([
@@ -237,7 +237,7 @@ class RefundService
         }
 
         $credentials = $credential->getDecryptedCredentials();
-        $clientRefundId = $refundRequest->client_refund_id ?: ('getfy-order-'.$order->id.'-refund');
+        $clientRefundId = $refundRequest->client_refund_id ?: ('spectra-order-'.$order->id.'-refund');
         $response = $this->cajuPayDriver->createPixRefund($paymentId, $credentials, $clientRefundId);
 
         $refundRequest->update([
@@ -361,7 +361,7 @@ class RefundService
 
         $buyerUserId = $this->resolveBuyerUserId($order);
         $paymentId = $this->cajuPayDriver->resolvePaymentIdForOrder($order);
-        $clientRefundId = 'getfy-order-'.$order->id.'-refund';
+        $clientRefundId = 'spectra-order-'.$order->id.'-refund';
 
         $refundRequest = RefundRequest::create([
             'tenant_id' => $order->tenant_id,

@@ -15,7 +15,7 @@ export const API_CHECKOUT_PAGARME_TOKENIZE_FORM_ID = 'api-checkout-pagarme-token
  */
 export const PAGARME_TOKENIZE_FORM_ACTION = '/checkout/pagarme-tokenize-sink';
 
-const SCRIPT_ATTR = 'data-getfy-pagarme-tokenize';
+const SCRIPT_ATTR = 'data-spectra-pagarme-tokenize';
 
 /** @type {string|null} */
 let loadedPk = null;

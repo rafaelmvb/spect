@@ -845,7 +845,7 @@ async function submitCard(ev) {
                 </div>
 
                 <p class="mt-8 text-center text-xs text-zinc-500">
-                    Powered by Getfy
+                    Powered by Spectra
                 </p>
             </div>
         </main>

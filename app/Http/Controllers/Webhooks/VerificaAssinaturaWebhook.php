@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
  * hoje é ProcessPaymentWebhook reconsultar o status na API do gateway antes de
  * marcar pago — o que este trait acrescenta é visibilidade (log de quem está
  * sem secret) e a opção de exigir assinatura via
- * GETFY_WEBHOOKS_REQUIRE_SIGNATURE=true, depois que os secrets estiverem todos
+ * SPECTRA_WEBHOOKS_REQUIRE_SIGNATURE=true, depois que os secrets estiverem todos
  * configurados.
  */
 trait VerificaAssinaturaWebhook
@@ -33,7 +33,7 @@ trait VerificaAssinaturaWebhook
         }
 
         if ($secret === null || $secret === '') {
-            $exigeAssinatura = (bool) config('getfy.webhooks.require_signature', false);
+            $exigeAssinatura = (bool) config('spectra.webhooks.require_signature', false);
 
             Log::warning('Webhook aceito sem verificação de assinatura: webhook_secret não configurado.', [
                 'gateway' => $gatewaySlug,

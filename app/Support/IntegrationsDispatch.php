@@ -12,7 +12,7 @@ class IntegrationsDispatch
      */
     public static function shouldDispatchAfterResponse(): bool
     {
-        if (config('getfy.integrations.dispatch_after_response') === false) {
+        if (config('spectra.integrations.dispatch_after_response') === false) {
             return false;
         }
 

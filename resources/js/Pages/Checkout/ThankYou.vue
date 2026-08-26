@@ -26,7 +26,7 @@ async function onConversionPixelsReady() {
     if (!props.order_id || !(Number(props.order_amount) > 0)) return;
     const api = conversionPixelsRef.value;
     const eid =
-        (props.meta_purchase_event_id || '').trim() || `getfy_purchase_${props.order_id}`;
+        (props.meta_purchase_event_id || '').trim() || `spectra_purchase_${props.order_id}`;
     const cur =
         typeof props.order_currency === 'string' && props.order_currency.trim()
             ? props.order_currency.trim().toUpperCase()

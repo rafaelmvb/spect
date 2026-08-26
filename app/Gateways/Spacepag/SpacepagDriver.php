@@ -97,7 +97,7 @@ class SpacepagDriver implements GatewayDriver
             ],
         ];
 
-        $idempotencyKey = 'getfy-order-'.preg_replace('/[^a-zA-Z0-9_-]/', '', $externalId);
+        $idempotencyKey = 'spectra-order-'.preg_replace('/[^a-zA-Z0-9_-]/', '', $externalId);
         $idempotencyKey = Str::limit($idempotencyKey, 200, '');
 
         $credentials = $this->ensureAuthMode($credentials);
@@ -341,7 +341,7 @@ class SpacepagDriver implements GatewayDriver
             ->timeout($this->timeoutSeconds($credentials))
             ->withOptions($options)
             ->withHeaders(array_merge($authHeaders, [
-                'User-Agent' => config('app.name', 'Getfy'),
+                'User-Agent' => config('app.name', 'Spectra'),
             ]));
     }
 
@@ -904,7 +904,7 @@ class SpacepagDriver implements GatewayDriver
     {
         $v = $credentials['force_ipv4'] ?? null;
         if ($v === null) {
-            return filter_var(getenv('GETFY_DOCKER') ?: false, FILTER_VALIDATE_BOOLEAN);
+            return filter_var(getenv('SPECTRA_DOCKER') ?: false, FILTER_VALIDATE_BOOLEAN);
         }
 
         return filter_var($v, FILTER_VALIDATE_BOOLEAN);
@@ -914,7 +914,7 @@ class SpacepagDriver implements GatewayDriver
     {
         $v = $credentials['disable_proxy'] ?? null;
         if ($v === null) {
-            return filter_var(getenv('GETFY_DOCKER') ?: false, FILTER_VALIDATE_BOOLEAN);
+            return filter_var(getenv('SPECTRA_DOCKER') ?: false, FILTER_VALIDATE_BOOLEAN);
         }
 
         return filter_var($v, FILTER_VALIDATE_BOOLEAN);

@@ -102,14 +102,14 @@ class CajuPayDriver implements GatewayDriver
         $name = $this->sanitizeName((string) ($consumer['name'] ?? ''));
         $email = $this->sanitizeEmail((string) ($consumer['email'] ?? ''));
 
-        $idempotencyKey = 'getfy-' . $externalId . '-' . Str::lower(Str::random(8));
+        $idempotencyKey = 'spectra-' . $externalId . '-' . Str::lower(Str::random(8));
 
         $body = [
             'amount_cents' => $amountCents,
             'currency' => 'BRL',
             'description' => 'Pedido #'.$externalId,
             'product_ref' => 'order-'.$externalId,
-            'customer_ref' => 'getfy-order-'.$externalId,
+            'customer_ref' => 'spectra-order-'.$externalId,
             'consumer' => [
                 'name' => $name,
                 'email' => $email !== '' ? $email : 'cliente@checkout.local',
@@ -357,7 +357,7 @@ class CajuPayDriver implements GatewayDriver
                 return [];
             }
 
-            // Normaliza pra os slugs internos do Getfy. A CajuPay usa 'applepay'/'googlepay'
+            // Normaliza pra os slugs internos do Spectra. A CajuPay usa 'applepay'/'googlepay'
             // (sem underscore) no SDK e na API; nosso checkout usa 'apple_pay'/'google_pay'.
             $normalized = [];
             foreach ($methods as $m) {
@@ -419,7 +419,7 @@ class CajuPayDriver implements GatewayDriver
             'allow_google_pay' => in_array('google_pay', $allowedMethods, true),
             'metadata' => [
                 'external_id' => $externalId,
-                'source' => 'getfy',
+                'source' => 'spectra',
             ],
         ];
 
@@ -447,7 +447,7 @@ class CajuPayDriver implements GatewayDriver
             $body['default_method'] = $defaultMethod;
         }
 
-        $idempotencyKey = 'getfy-sdk-'.$externalId.'-'.Str::lower(Str::random(8));
+        $idempotencyKey = 'spectra-sdk-'.$externalId.'-'.Str::lower(Str::random(8));
 
         $response = $this->httpForCredentials($credentials)
             ->withHeaders(['Idempotency-Key' => Str::limit($idempotencyKey, 200, '')])
@@ -550,7 +550,7 @@ class CajuPayDriver implements GatewayDriver
             } else {
                 $response = $http->post('/api/webhooks/endpoints', [
                     'url' => $url,
-                    'description' => 'Getfy ('.parse_url($url, PHP_URL_HOST).')',
+                    'description' => 'Spectra ('.parse_url($url, PHP_URL_HOST).')',
                     'event_types' => [
                         'checkout.payment.paid',
                         'checkout.payment.failed',

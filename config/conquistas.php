@@ -1,54 +1,59 @@
 <?php
 
+/*
+| 'image' fica null: as artes originais eram servidas por CDN de terceiro.
+| O painel esconde a imagem quando vazia (v-if="a.image").
+*/
+
 return [
     'achievements' => [
         [
             'threshold' => 10_000,
             'slug' => 'filhote',
             'name' => 'Filhote',
-            'image' => 'https://cdn.getfy.cloud/conquistas/10k.png',
+            'image' => null,
         ],
         [
             'threshold' => 50_000,
             'slug' => 'jacare-cacador',
             'name' => 'Jacaré Caçador',
-            'image' => 'https://cdn.getfy.cloud/conquistas/50k.png',
+            'image' => null,
         ],
         [
             'threshold' => 100_000,
             'slug' => 'predador',
             'name' => 'Predador',
-            'image' => 'https://cdn.getfy.cloud/conquistas/100K.png',
+            'image' => null,
         ],
         [
             'threshold' => 500_000,
             'slug' => 'alpha-pantano',
             'name' => 'Alpha do Pântano',
-            'image' => 'https://cdn.getfy.cloud/conquistas/500K.png',
+            'image' => null,
         ],
         [
             'threshold' => 1_000_000,
             'slug' => 'rei-pantano',
             'name' => 'Rei do Pântano',
-            'image' => 'https://cdn.getfy.cloud/conquistas/1M.png',
+            'image' => null,
         ],
         [
             'threshold' => 5_000_000,
-            'slug' => 'lenda-getfy',
-            'name' => 'Lenda da Getfy',
-            'image' => 'https://cdn.getfy.cloud/conquistas/5M.png',
+            'slug' => 'lenda-spectra',
+            'name' => 'Lenda da Spectra',
+            'image' => null,
         ],
         [
             'threshold' => 10_000_000,
             'slug' => 'imperador-predador',
             'name' => 'Imperador Predador',
-            'image' => 'https://cdn.getfy.cloud/conquistas/10M.png',
+            'image' => null,
         ],
         [
             'threshold' => 25_000_000,
             'slug' => 'jacare-supremo',
             'name' => 'Jacaré Supremo',
-            'image' => 'https://cdn.getfy.cloud/conquistas/25M.png',
+            'image' => null,
         ],
     ],
 ];

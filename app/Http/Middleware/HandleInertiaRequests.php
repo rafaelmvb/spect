@@ -55,12 +55,12 @@ class HandleInertiaRequests extends Middleware
         $tenantId = $user?->tenant_id;
 
         $appSettings = $user ? [
-            'app_name' => config('getfy.app_name'),
-            'theme_primary' => config('getfy.theme_primary'),
-            'app_logo' => config('getfy.app_logo'),
-            'app_logo_dark' => config('getfy.app_logo_dark'),
-            'app_logo_icon' => config('getfy.app_logo_icon'),
-            'app_logo_icon_dark' => config('getfy.app_logo_icon_dark'),
+            'app_name' => config('spectra.app_name'),
+            'theme_primary' => config('spectra.theme_primary'),
+            'app_logo' => config('spectra.app_logo'),
+            'app_logo_dark' => config('spectra.app_logo_dark'),
+            'app_logo_icon' => config('spectra.app_logo_icon'),
+            'app_logo_icon_dark' => config('spectra.app_logo_icon_dark'),
         ] : null;
 
         $publicBranding = $this->buildPublicBranding();
@@ -76,8 +76,8 @@ class HandleInertiaRequests extends Middleware
         if ($user && $user->canAccessPanel()) {
             $settingsPluginTabs = PluginRegistry::getSettingsTabs();
             $pluginNavItems = PluginRegistry::getMenuItems();
-            $vapidPublic = config('getfy.pwa.vapid_public');
-            $pushEnabled = ! empty($vapidPublic) && ! empty(config('getfy.pwa.vapid_private'));
+            $vapidPublic = config('spectra.pwa.vapid_public');
+            $pushEnabled = ! empty($vapidPublic) && ! empty(config('spectra.pwa.vapid_private'));
             $installed = PluginRegistry::installed();
             $plugins = array_map(fn ($p) => [
                 'slug' => $p['slug'],
@@ -265,26 +265,25 @@ class HandleInertiaRequests extends Middleware
      */
     private function buildPublicBranding(): array
     {
-        $themePrimary = (string) config('getfy.theme_primary', '#00cc00');
-        $pwaTheme = config('getfy.pwa_theme_color');
+        $themePrimary = (string) config('spectra.theme_primary', '#00cc00');
+        $pwaTheme = config('spectra.pwa_theme_color');
         $pwaTheme = ($pwaTheme !== null && $pwaTheme !== '') ? (string) $pwaTheme : $themePrimary;
-        $favicon = config('getfy.favicon_url');
-        $favicon = ($favicon !== null && $favicon !== '') ? (string) $favicon : 'https://cdn.getfy.cloud/collapsed-logo.png';
-        $loginHero = config('getfy.login_hero_image');
-        $loginHero = ($loginHero !== null && $loginHero !== '') ? (string) $loginHero : 'https://cdn.getfy.cloud/login.webp';
+        // Sem imagem padrao: o front trata string vazia escondendo o elemento.
+        $favicon = (string) (config('spectra.favicon_url') ?? '');
+        $loginHero = (string) (config('spectra.login_hero_image') ?? '');
 
         return [
-            'app_name' => (string) config('getfy.app_name', 'Getfy'),
+            'app_name' => (string) config('spectra.app_name', config('app.name', 'Spectra')),
             'theme_primary' => $themePrimary,
             'pwa_theme_color' => $pwaTheme,
-            'app_logo' => (string) config('getfy.app_logo'),
-            'app_logo_dark' => (string) config('getfy.app_logo_dark'),
-            'app_logo_icon' => (string) config('getfy.app_logo_icon'),
-            'app_logo_icon_dark' => (string) config('getfy.app_logo_icon_dark'),
+            'app_logo' => (string) config('spectra.app_logo'),
+            'app_logo_dark' => (string) config('spectra.app_logo_dark'),
+            'app_logo_icon' => (string) config('spectra.app_logo_icon'),
+            'app_logo_icon_dark' => (string) config('spectra.app_logo_icon_dark'),
             'login_hero_image' => $loginHero,
             'favicon_url' => $favicon,
-            'pwa_icon_192' => config('getfy.pwa_icon_192'),
-            'pwa_icon_512' => config('getfy.pwa_icon_512'),
+            'pwa_icon_192' => config('spectra.pwa_icon_192'),
+            'pwa_icon_512' => config('spectra.pwa_icon_512'),
         ];
     }
 }

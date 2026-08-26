@@ -112,8 +112,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'noreply@getfy.com'),
-        'name' => env('MAIL_FROM_NAME', 'Getfy'),
+        'address' => env('MAIL_FROM_ADDRESS', 'noreply@'.(parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST) ?: 'localhost')),
+        'name' => env('MAIL_FROM_NAME', 'Spectra'),
     ],
 
 ];

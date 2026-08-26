@@ -1100,12 +1100,12 @@ const inputClass =
                             <p>
                                 No editor CSS/JS/HTML use <strong>Ctrl+Espaço</strong> (ou Cmd+Espaço no Mac) para autocomplete com
                                 dezenas de seletores (<code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">data-checkout</code>,
-                                <code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">#getfy-checkout-root</code>,
+                                <code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">#spectra-checkout-root</code>,
                                 <code class="rounded bg-zinc-100 px-1 dark:bg-zinc-800">data-payment-method</code>, etc.).
                             </p>
                             <p class="text-zinc-500 dark:text-zinc-500">Exemplos rápidos:</p>
                             <ul class="list-disc space-y-1 pl-4 font-mono text-[11px] text-zinc-800 dark:text-zinc-300">
-                                <li>#getfy-checkout-root</li>
+                                <li>#spectra-checkout-root</li>
                                 <li>[data-checkout="card-main"]</li>
                                 <li>[data-checkout="form-submit"]</li>
                                 <li>[data-payment-method="pix"]</li>

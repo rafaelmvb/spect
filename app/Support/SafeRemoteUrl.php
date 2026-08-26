@@ -54,7 +54,7 @@ class SafeRemoteUrl
      */
     private static function allowedHosts(): array
     {
-        $hosts = ['r2.getfy.cloud'];
+        $hosts = [];
 
         $appHost = parse_url((string) config('app.url', ''), PHP_URL_HOST);
         if (is_string($appHost) && $appHost !== '') {

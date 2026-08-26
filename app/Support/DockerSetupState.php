@@ -6,9 +6,9 @@ class DockerSetupState
 {
     public static function isDocker(): bool
     {
-        $raw = getenv('GETFY_DOCKER');
+        $raw = getenv('SPECTRA_DOCKER');
         if ($raw === false) {
-            $raw = $_ENV['GETFY_DOCKER'] ?? $_SERVER['GETFY_DOCKER'] ?? null;
+            $raw = $_ENV['SPECTRA_DOCKER'] ?? $_SERVER['SPECTRA_DOCKER'] ?? null;
         }
         if (filter_var($raw, FILTER_VALIDATE_BOOLEAN)) {
             return true;

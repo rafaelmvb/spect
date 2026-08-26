@@ -59,8 +59,8 @@ class PanelPushService
 
     public function sendToTenant(?int $tenantId, string $title, string $body, ?string $url = null): int
     {
-        $vapidPublic = VapidEnvKeys::normalize(config('getfy.pwa.vapid_public'));
-        $vapidPrivate = VapidEnvKeys::normalize(config('getfy.pwa.vapid_private'));
+        $vapidPublic = VapidEnvKeys::normalize(config('spectra.pwa.vapid_public'));
+        $vapidPrivate = VapidEnvKeys::normalize(config('spectra.pwa.vapid_private'));
 
         if (! $vapidPublic || ! $vapidPrivate) {
             Log::warning('PanelPushService: VAPID não configurado (defina PWA_VAPID_PUBLIC e PWA_VAPID_PRIVATE no .env)', ['tenant_id' => $tenantId]);
