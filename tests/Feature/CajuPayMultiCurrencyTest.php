@@ -30,7 +30,7 @@ class CajuPayMultiCurrencyTest extends TestCase
         ]);
 
         User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -97,7 +97,7 @@ class CajuPayMultiCurrencyTest extends TestCase
             '*/api/sdk/public/checkout/sessions/*' => Http::response(['methods_available' => ['card']], 200),
         ]);
 
-        User::factory()->create(['role' => User::ROLE_INFOPRODUTOR, 'tenant_id' => 1]);
+        User::factory()->create(['role' => User::ROLE_ADMIN, 'tenant_id' => 1]);
 
         Setting::set('currencies', [
             ['code' => 'BRL', 'rate_to_brl' => 1],
@@ -152,7 +152,7 @@ class CajuPayMultiCurrencyTest extends TestCase
             '*/api/sdk/public/checkout/sessions/*' => Http::response(['methods_available' => ['card']], 200),
         ]);
 
-        User::factory()->create(['role' => User::ROLE_INFOPRODUTOR, 'tenant_id' => 1]);
+        User::factory()->create(['role' => User::ROLE_ADMIN, 'tenant_id' => 1]);
 
         Setting::set('currencies', [
             ['code' => 'BRL', 'rate_to_brl' => 1],
@@ -207,7 +207,7 @@ class CajuPayMultiCurrencyTest extends TestCase
             '*/api/sdk/public/checkout/sessions/*' => Http::response(['methods_available' => ['card']], 200),
         ]);
 
-        User::factory()->create(['role' => User::ROLE_INFOPRODUTOR, 'tenant_id' => 1]);
+        User::factory()->create(['role' => User::ROLE_ADMIN, 'tenant_id' => 1]);
 
         $product = $this->createTestProduct([
             'price' => 100,

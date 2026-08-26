@@ -16,7 +16,7 @@ class TeamAccessTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         $owner = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -50,7 +50,7 @@ class TeamAccessTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         $owner = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -113,7 +113,7 @@ class TeamAccessTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         $owner = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -153,7 +153,7 @@ class TeamAccessTest extends TestCase
         Mail::fake();
 
         $owner = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -196,9 +196,17 @@ class TeamAccessTest extends TestCase
             'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
-        $owner = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+
+        // Cargo com permissão de equipe: chega na rota, mas limpar log é só de admin.
+        $role = TeamRole::create([
             'tenant_id' => 1,
+            'name' => 'Gestor de equipe',
+            'permissions' => ['equipe.manage'],
+        ]);
+        $team = User::factory()->create([
+            'role' => User::ROLE_TEAM,
+            'tenant_id' => 1,
+            'team_role_id' => $role->id,
         ]);
 
         \App\Models\TeamAuditLog::create([
@@ -207,7 +215,7 @@ class TeamAccessTest extends TestCase
             'action' => 'team.member.created',
         ]);
 
-        $this->actingAs($owner)
+        $this->actingAs($team)
             ->post('/usuarios/equipe/logs/clear')
             ->assertStatus(403);
 

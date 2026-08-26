@@ -3,13 +3,12 @@ import { ref, computed, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import LayoutInfoprodutor from '@/Layouts/LayoutInfoprodutor.vue';
 import Button from '@/components/ui/Button.vue';
-import { Puzzle, Power, PowerOff, ExternalLink, CreditCard, Package, Download, Upload, Trash2, FolderUp } from 'lucide-vue-next';
+import { Puzzle, Power, PowerOff, ExternalLink, CreditCard, Download, Trash2, FolderUp } from 'lucide-vue-next';
 
 defineOptions({ layout: LayoutInfoprodutor });
 
 const TABS = [
     { id: 'installed', label: 'Instalados', icon: Puzzle },
-    { id: 'store', label: 'Loja de plugins', icon: Package },
 ];
 
 const CATEGORY_LABELS = {
@@ -26,44 +25,14 @@ const props = defineProps({
     installedPluginSlugs: { type: Array, default: () => [] },
     /** Lista de nomes dos plugins instalados (para comparar com a loja por nome). */
     installedPluginNames: { type: Array, default: () => [] },
-    storePlugins: { type: Array, default: () => [] },
-    pluginStore: { type: Object, default: () => ({ store_url: '', submit_url: '' }) },
     pluginsPath: { type: String, default: '' },
-    /** Pasta persistente para instalações (ZIP/loja). */
+    /** Pasta persistente para instalações via ZIP. */
     plugins_install_path: { type: String, default: '' },
     /** Pasta versionada com o código (ex.: example-gateway). */
     plugins_bundled_path: { type: String, default: '' },
 });
 
 const page = usePage();
-/** Normaliza slug para comparação (loja pode usar _ e pasta pode usar -). */
-function normalizeSlug(s) {
-    if (s == null || typeof s !== 'string') return '';
-    return s.toLowerCase().replace(/_/g, '-').replace(/[^a-z0-9-]/g, '');
-}
-/** Normaliza nome para comparação (minúsculas, sem acentos, espaços colapsados). */
-function normalizeName(s) {
-    if (s == null || typeof s !== 'string') return '';
-    const t = s.toLowerCase().trim().replace(/\s+/g, ' ');
-    return t.normalize('NFD').replace(/\p{Diacritic}/gu, '');
-}
-/** Sets de slugs e nomes instalados (servidor), normalizados. */
-const installedSlugsSet = computed(() => {
-    const slugs = Array.isArray(props.installedPluginSlugs) ? props.installedPluginSlugs : [];
-    return new Set(slugs.map((slug) => normalizeSlug(slug)));
-});
-const installedNamesSet = computed(() => {
-    const names = Array.isArray(props.installedPluginNames) ? props.installedPluginNames : [];
-    return new Set(names.map((name) => normalizeName(name)));
-});
-/** Verifica se o plugin da loja está instalado — por slug ou por nome. */
-function isStorePluginInstalled(storePlugin) {
-    const slug = storePlugin?.slug ?? storePlugin;
-    const name = typeof storePlugin === 'object' ? storePlugin?.name : undefined;
-    if (slug && installedSlugsSet.value.has(normalizeSlug(slug))) return true;
-    if (name && installedNamesSet.value.has(normalizeName(name))) return true;
-    return false;
-}
 const currentTab = computed(() => {
     const url = page.url;
     const idx = url.indexOf('?');
@@ -73,142 +42,18 @@ const currentTab = computed(() => {
     return TABS.some((tab) => tab.id === t) ? t : 'installed';
 });
 
-const storeDetail = ref(null);
-const installingSlug = ref(null);
-const storeBannerFailed = ref({});
-const storePluginsList = ref([]);
-const storePluginsLoading = ref(false);
-const storePluginsError = ref(null);
-const lastInstallDownloadUrl = ref(null);
-const lastInstallSlug = ref(null);
 const showZipUnavailableModal = ref(false);
 const showManualInstallModal = ref(false);
 const manualInstallFileInput = ref(null);
 const manualInstallError = ref('');
 const manualInstallProcessing = ref(false);
-const downloadFallbackLoading = ref(false);
-const downloadFallbackError = ref('');
 
 function setTab(tabId) {
     router.get('/gerenciar-plugins', { tab: tabId }, { preserveState: true });
 }
 
-async function loadStorePlugins() {
-    const baseUrl = props.pluginStore?.store_url;
-    if (!baseUrl) {
-        storePluginsError.value = 'Configure PLUGIN_STORE_URL no .env (ex.: http://plugins-getfy.test).';
-        return;
-    }
-    storePluginsError.value = null;
-    storePluginsLoading.value = true;
-    try {
-        // Busca direto na API da loja (navegador → plugins-getfy) para evitar requisição servidor→servidor que caía no vhost errado
-        const apiUrl = baseUrl.replace(/\/$/, '') + '/api/v1/plugins';
-        const r = await fetch(apiUrl);
-        const json = await r.json();
-        storePluginsList.value = Array.isArray(json?.data) ? json.data : [];
-        if (json?.error) storePluginsError.value = json.error;
-        if (!r.ok) storePluginsError.value = json?.error || `Loja retornou HTTP ${r.status}.`;
-    } catch (e) {
-        storePluginsList.value = [];
-        storePluginsError.value = 'Não foi possível carregar a loja. Verifique a conexão e PLUGIN_STORE_URL.';
-    } finally {
-        storePluginsLoading.value = false;
-    }
-}
-
 function categoryLabel(category) {
     return CATEGORY_LABELS[category] ?? category ?? 'Outros';
-}
-
-async function openStoreDetail(plugin) {
-    storeDetail.value = { ...plugin };
-    const baseUrl = props.pluginStore?.store_url;
-    if (!baseUrl) return;
-    try {
-        const apiUrl = baseUrl.replace(/\/$/, '') + '/api/v1/plugins/' + encodeURIComponent(plugin.slug);
-        const r = await fetch(apiUrl);
-        if (r.ok) {
-            const json = await r.json();
-            if (json?.data) {
-                storeDetail.value = { ...storeDetail.value, ...json.data };
-            }
-        }
-    } catch (_) {}
-}
-
-function closeStoreDetail() {
-    storeDetail.value = null;
-}
-
-function setStoreBannerFailed(slug) {
-    storeBannerFailed.value = { ...storeBannerFailed.value, [slug]: true };
-}
-
-const returnUrl = computed(() => {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return base + '/gerenciar-plugins?tab=installed&install=';
-});
-
-function checkoutUrl(slug) {
-    const url = props.pluginStore?.store_url || '';
-    if (!url) return '#';
-    const base = url.replace(/\/$/, '');
-    const targetCheckout = '/c/' + slug + '?return_url=' + encodeURIComponent(returnUrl.value + slug);
-    return `${base}/login?next=${encodeURIComponent(targetCheckout)}`;
-}
-
-async function installStorePlugin(slug, purchaseToken = null) {
-    const baseUrl = props.pluginStore?.store_url;
-    if (!baseUrl) {
-        storePluginsError.value = 'Loja não configurada.';
-        return;
-    }
-    installingSlug.value = slug;
-    storePluginsError.value = null;
-    try {
-        // 1) Obter link de download no navegador (evita requisição servidor→loja)
-        const apiUrl = baseUrl.replace(/\/$/, '') + '/api/v1/plugins/' + encodeURIComponent(slug) + '/request-download';
-        const body = purchaseToken ? { purchase_token: purchaseToken } : {};
-        const r = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify(body),
-            credentials: 'omit',
-        });
-        const json = await r.json().catch(() => ({}));
-        const downloadUrl = json?.download_url;
-        if (!r.ok || !downloadUrl) {
-            storePluginsError.value = json?.message || json?.error || `Loja retornou HTTP ${r.status}.`;
-            installingSlug.value = null;
-            return;
-        }
-        // 2) Baixar o ZIP no navegador (evita que o servidor precise acessar a loja)
-        const zipRes = await fetch(downloadUrl, { credentials: 'omit' });
-        if (!zipRes.ok) {
-            storePluginsError.value = 'Não foi possível baixar o arquivo do plugin.';
-            installingSlug.value = null;
-            return;
-        }
-        const blob = await zipRes.blob();
-        const file = new File([blob], slug + '.zip', { type: 'application/zip' });
-        lastInstallDownloadUrl.value = downloadUrl;
-        lastInstallSlug.value = slug;
-        // 3) Enviar via Inertia (CSRF e redirect tratados automaticamente)
-        router.post(`/gerenciar-plugins/install/${slug}`, { plugin_zip: file }, {
-            preserveScroll: true,
-            forceFormData: true,
-            onFinish: () => { installingSlug.value = null; },
-            onError: (errors) => {
-                storePluginsError.value = typeof errors === 'object' && errors?.plugin_zip
-                    ? (Array.isArray(errors.plugin_zip) ? errors.plugin_zip[0] : errors.plugin_zip)
-                    : 'Falha ao instalar. Tente novamente.';
-            },
-        });
-    } catch (e) {
-        storePluginsError.value = 'Não foi possível obter ou instalar o plugin. Verifique a conexão.';
-        installingSlug.value = null;
-    }
 }
 
 function enablePlugin(slug) {
@@ -247,65 +92,12 @@ function setBannerFailed(slug) {
     bannerLoadFailed.value = { ...bannerLoadFailed.value, [slug]: true };
 }
 
-const urlPurchaseToken = ref(null);
-const urlInstallSlug = ref(null);
-watch(() => page.url, () => {
-    if (typeof window === 'undefined') return;
-    const q = new URLSearchParams(window.location.search);
-    urlPurchaseToken.value = q.get('purchase_token') || null;
-    urlInstallSlug.value = q.get('install') || null;
-}, { immediate: true });
-
-watch([urlPurchaseToken, urlInstallSlug, currentTab], ([token, installSlug, tab]) => {
-    if (tab !== 'installed' || !installSlug || !token) return;
-    installStorePlugin(installSlug, token);
-}, { immediate: true });
-
 watch(() => page.props?.flash?.zip_unavailable, (v) => {
     if (v) showZipUnavailableModal.value = true;
 });
 
-function openZipUnavailableModal() {
-    showZipUnavailableModal.value = true;
-    downloadFallbackError.value = '';
-}
-
 function closeZipUnavailableModal() {
     showZipUnavailableModal.value = false;
-}
-
-async function downloadPluginFallback() {
-    const slug = lastInstallSlug.value;
-    const baseUrl = props.pluginStore?.store_url;
-    if (!slug || !baseUrl) {
-        if (lastInstallDownloadUrl.value) window.open(lastInstallDownloadUrl.value, '_blank');
-        closeZipUnavailableModal();
-        return;
-    }
-    downloadFallbackError.value = '';
-    downloadFallbackLoading.value = true;
-    try {
-        const apiUrl = baseUrl.replace(/\/$/, '') + '/api/v1/plugins/' + encodeURIComponent(slug) + '/request-download';
-        const body = urlPurchaseToken.value ? { purchase_token: urlPurchaseToken.value } : {};
-        const r = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-            body: JSON.stringify(body),
-            credentials: 'omit',
-        });
-        const json = await r.json().catch(() => ({}));
-        const downloadUrl = json?.download_url;
-        if (!r.ok || !downloadUrl) {
-            downloadFallbackError.value = json?.message || json?.error || 'Não foi possível obter o link de download.';
-            return;
-        }
-        window.open(downloadUrl, '_blank');
-        closeZipUnavailableModal();
-    } catch (e) {
-        downloadFallbackError.value = 'Não foi possível obter o link. Tente instalar manualmente com o ZIP.';
-    } finally {
-        downloadFallbackLoading.value = false;
-    }
 }
 
 function openManualInstallModal() {
@@ -516,33 +308,6 @@ function submitManualInstall() {
             </section>
         </template>
 
-        <!-- Aba Loja de plugins (catálogo em breve; use ZIP na aba Instalados) -->
-        <template v-if="currentTab === 'store'">
-            <section class="relative min-h-[280px] overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50/80 dark:border-zinc-700 dark:bg-zinc-900/40">
-                <div
-                    class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center bg-white/85 px-6 text-center backdrop-blur-[2px] dark:bg-zinc-950/80"
-                >
-                    <Package class="mb-4 h-14 w-14 text-zinc-400 dark:text-zinc-500" aria-hidden="true" />
-                    <p class="text-2xl font-semibold text-zinc-800 dark:text-zinc-100">Em breve</p>
-                    <p class="mt-2 max-w-md text-sm text-zinc-600 dark:text-zinc-400">
-                        A loja de plugins estará disponível em breve. Enquanto isso, use a aba
-                        <strong class="font-medium text-zinc-800 dark:text-zinc-200">Instalados</strong>
-                        e o botão <strong class="font-medium text-zinc-800 dark:text-zinc-200">Instalar plugin (ZIP)</strong>.
-                    </p>
-                    <a
-                        v-if="pluginStore?.submit_url"
-                        :href="pluginStore.submit_url"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="pointer-events-auto mt-6 inline-flex items-center gap-2 text-sm text-[var(--color-primary)] hover:underline"
-                    >
-                        <Upload class="h-4 w-4" />
-                        Subir meu plugin para loja
-                    </a>
-                </div>
-            </section>
-        </template>
-
         <!-- Modal: extensão Zip não disponível (fallback) -->
         <Teleport to="body">
             <div
@@ -568,7 +333,6 @@ function submitManualInstall() {
                             Extrair manualmente no servidor
                         </p>
                         <ol class="mt-2 list-decimal space-y-1 pl-4 text-sm text-zinc-600 dark:text-zinc-400">
-                            <li>Obtenha o ZIP do plugin (use o botão abaixo para gerar o link).</li>
                             <li>No painel da sua hospedagem (gerenciador de arquivos, FTP etc.), acesse a pasta de plugins do projeto.</li>
                             <li>Envie o ZIP para essa pasta ou baixe o arquivo direto do link para o servidor (muitos painéis têm “Baixar de URL”).</li>
                             <li>Extraia o ZIP nessa mesma pasta. O resultado deve ser uma pasta que contém o arquivo <code class="rounded bg-zinc-200 px-1 dark:bg-zinc-700">plugin.json</code>.</li>
@@ -583,25 +347,10 @@ function submitManualInstall() {
                             <li>Atualize esta página para o plugin aparecer.</li>
                         </ol>
                     </div>
-
-                    <p v-if="downloadFallbackError" class="mt-2 text-sm text-red-600 dark:text-red-400">
-                        {{ downloadFallbackError }}
-                    </p>
                     <div class="mt-6 flex flex-wrap gap-2">
-                        <Button
-                            v-if="lastInstallSlug"
-                            size="sm"
-                            :disabled="downloadFallbackLoading"
-                            @click="downloadPluginFallback"
-                        >
-                            <Download v-if="!downloadFallbackLoading" class="mr-1 h-4 w-4" />
-                            <span v-else class="mr-1 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                            {{ downloadFallbackLoading ? 'Gerando link...' : 'Baixar plugin (ZIP)' }}
-                        </Button>
                         <Button
                             variant="outline"
                             size="sm"
-                            :disabled="downloadFallbackLoading"
                             @click="openManualInstallModal"
                         >
                             <FolderUp class="mr-1 h-4 w-4" />

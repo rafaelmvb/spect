@@ -11,7 +11,7 @@ class EmailSettingsTest extends TestCase
 {
     public function test_email_test_endpoint_returns_success()
     {
-        $user = User::factory()->create(['role' => User::ROLE_INFOPRODUTOR]);
+        $user = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
         // Prepare some settings (global)
         Setting::set('smtp_host', 'smtp.example.com', null);
@@ -33,7 +33,7 @@ class EmailSettingsTest extends TestCase
 
     public function test_email_send_test_endpoint_returns_success()
     {
-        $user = User::factory()->create(['role' => User::ROLE_INFOPRODUTOR]);
+        $user = User::factory()->create(['role' => User::ROLE_ADMIN]);
 
         Setting::set('smtp_host', 'smtp.example.com', null);
         Setting::set('smtp_port', '587', null);

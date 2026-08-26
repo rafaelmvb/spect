@@ -101,7 +101,7 @@ class MemberAreaEmbeddedModulesTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         $owner = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Plugins\PluginRegistry;
-use App\Services\PluginStoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -43,104 +42,6 @@ class PluginInstallController extends Controller
         }
     }
 
-    public function __invoke(Request $request, string $slug): RedirectResponse
-    {
-        if (! preg_match('/^[a-z0-9\-]+$/i', $slug)) {
-            return $this->pluginsIndexRedirect(['error' => 'Slug inválido.']);
-        }
-
-        if (! class_exists('ZipArchive')) {
-            return $this->pluginsIndexRedirect([
-                'error' => 'A extensão PHP Zip não está habilitada. Baixe o plugin e instale manualmente ou habilite a extensão no php.ini.',
-                'zip_unavailable' => true,
-            ]);
-        }
-
-        $store = app(PluginStoreService::class);
-        $useUploadedFile = $request->hasFile('plugin_zip');
-        if (! $useUploadedFile && ! $store->isConfigured()) {
-            return $this->pluginsIndexRedirect(['error' => 'Loja de plugins não configurada. Envie o ZIP em “Instalar plugin (ZIP)” na aba Instalados.']);
-        }
-
-        $tempFile = null;
-
-        if ($useUploadedFile) {
-            $upload = $request->file('plugin_zip');
-            $ext = strtolower($upload->getClientOriginalExtension() ?? '');
-            $mime = $upload->getMimeType();
-            $zipMimes = ['application/zip', 'application/x-zip-compressed', 'application/octet-stream'];
-            if ($ext !== 'zip' && ! in_array($mime, $zipMimes, true)) {
-                return $this->pluginsIndexRedirect(['error' => 'Arquivo do plugin deve ser um ZIP.']);
-            }
-            $tempFile = $this->persistUploadedZipToLocalTemp($upload);
-            if ($tempFile === null) {
-                return $this->pluginsIndexRedirect(['error' => 'Não foi possível salvar o arquivo enviado. Verifique permissões de storage/app.']);
-            }
-        } else {
-            $downloadUrl = $request->input('download_url');
-            if ($downloadUrl && is_string($downloadUrl)) {
-                $storeBase = $store->getBaseUrl();
-                if ($storeBase === '' || (! str_starts_with($downloadUrl, $storeBase . '/') && ! str_starts_with($downloadUrl, $storeBase . '?'))) {
-                    return $this->pluginsIndexRedirect(['error' => 'Link de download inválido.']);
-                }
-                $download = ['download_url' => $downloadUrl, 'expires_at' => ''];
-            } else {
-                $purchaseToken = $request->input('purchase_token');
-                $platformId = config('app.name') . '-' . md5(config('app.key'));
-                $download = $store->requestDownloadUrl($slug, $purchaseToken ?: null, $platformId);
-                if (! $download || empty($download['download_url'])) {
-                    $reason = $store->getLastError();
-                    $message = $reason
-                        ? 'Não foi possível obter o link de download: ' . $reason
-                        : 'Não foi possível obter o link de download. Verifique se o plugin é gratuito ou se o token de compra é válido.';
-                    return $this->pluginsIndexRedirect(['error' => $message]);
-                }
-            }
-
-            $resolvedEarly = $this->persistentPluginInstallPaths();
-            if ($resolvedEarly === null || ! is_dir($resolvedEarly[1])) {
-                return $this->pluginsIndexRedirect(['error' => 'Pasta de plugins indisponível.']);
-            }
-
-            $tempFile = tempnam($this->writableTempDirectory(), 'plugin_' . $slug . '_');
-            if ($tempFile === false) {
-                return $this->pluginsIndexRedirect(['error' => 'Erro ao criar arquivo temporário.']);
-            }
-
-            try {
-                $response = Http::timeout(60)->withOptions(['sink' => $tempFile])->get($download['download_url']);
-                if (! $response->successful()) {
-                    @unlink($tempFile);
-                    return $this->pluginsIndexRedirect(['error' => 'Falha ao baixar o plugin.']);
-                }
-            } catch (\Throwable $e) {
-                @unlink($tempFile);
-                report($e);
-                return $this->pluginsIndexRedirect(['error' => 'Erro ao baixar o plugin.']);
-            }
-        }
-
-        $resolved = $this->persistentPluginInstallPaths();
-        if ($resolved === null || ! is_dir($resolved[1])) {
-            if ($tempFile && is_file($tempFile)) {
-                @unlink($tempFile);
-            }
-            return $this->pluginsIndexRedirect(['error' => 'Pasta de plugins indisponível.']);
-        }
-        [$pluginsPath, $realPluginsPath] = $resolved;
-
-        $error = $this->extractZipToPlugins($tempFile, $slug, $pluginsPath, $realPluginsPath);
-        if ($error) {
-            return $error;
-        }
-
-        return $this->registerAndRunMigrations($slug)
-            ?? $this->pluginsIndexRedirect(['success' => 'Plugin instalado com sucesso.']);
-    }
-
-    /**
-     * POST /gerenciar-plugins/install-from-zip - Instala a partir apenas do ZIP; slug inferido pela pasta raiz.
-     */
     public function installFromZip(Request $request): RedirectResponse
     {
         if (! class_exists('ZipArchive')) {

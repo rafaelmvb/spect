@@ -10,7 +10,7 @@ class PublicCheckoutSecurityTest extends TestCase
     public function test_public_checkout_rejects_manual_payment_method(): void
     {
         User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -44,7 +44,7 @@ class PublicCheckoutSecurityTest extends TestCase
     public function test_public_checkout_requires_payment_method(): void
     {
         User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 

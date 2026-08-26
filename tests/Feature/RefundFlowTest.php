@@ -150,7 +150,7 @@ class RefundFlowTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         $tenantId = 1;
-        $admin = User::factory()->create(['tenant_id' => $tenantId, 'role' => User::ROLE_INFOPRODUTOR]);
+        $admin = User::factory()->create(['tenant_id' => $tenantId, 'role' => User::ROLE_ADMIN]);
         $buyer = User::factory()->create(['tenant_id' => $tenantId, 'role' => User::ROLE_ALUNO]);
         $product = $this->createTestProduct(['name' => 'Curso', 'type' => Product::TYPE_AREA_MEMBROS]);
 
@@ -180,7 +180,7 @@ class RefundFlowTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         $tenantId = 1;
-        $admin = User::factory()->create(['tenant_id' => $tenantId, 'role' => User::ROLE_INFOPRODUTOR]);
+        $admin = User::factory()->create(['tenant_id' => $tenantId, 'role' => User::ROLE_ADMIN]);
         $buyer = User::factory()->create(['tenant_id' => $tenantId, 'role' => User::ROLE_ALUNO]);
         $product = $this->createTestProduct(['name' => 'Curso', 'type' => Product::TYPE_AREA_MEMBROS]);
         $product->users()->attach($buyer->id);

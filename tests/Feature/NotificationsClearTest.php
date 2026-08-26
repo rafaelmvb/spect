@@ -17,7 +17,7 @@ class NotificationsClearTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         $user = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 

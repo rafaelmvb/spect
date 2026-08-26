@@ -14,7 +14,7 @@ class CheckoutConfigOfferPlanInheritanceTest extends TestCase
     public function test_offer_checkout_config_update_does_not_persist_product_only_payment_keys(): void
     {
         $user = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -69,7 +69,7 @@ class CheckoutConfigOfferPlanInheritanceTest extends TestCase
     public function test_plan_checkout_config_update_does_not_persist_product_only_payment_keys(): void
     {
         $user = User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 

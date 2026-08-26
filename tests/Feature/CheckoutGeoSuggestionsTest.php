@@ -13,7 +13,7 @@ class CheckoutGeoSuggestionsTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -40,7 +40,7 @@ class CheckoutGeoSuggestionsTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -64,7 +64,7 @@ class CheckoutGeoSuggestionsTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 
@@ -87,7 +87,7 @@ class CheckoutGeoSuggestionsTest extends TestCase
         $this->withoutMiddleware(EnsureInstalled::class);
 
         User::factory()->create([
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
             'tenant_id' => 1,
         ]);
 

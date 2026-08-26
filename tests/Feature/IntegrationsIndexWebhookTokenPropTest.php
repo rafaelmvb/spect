@@ -13,7 +13,7 @@ class IntegrationsIndexWebhookTokenPropTest extends TestCase
     {
         $user = User::factory()->create([
             'tenant_id' => 1,
-            'role' => User::ROLE_INFOPRODUTOR,
+            'role' => User::ROLE_ADMIN,
         ]);
 
         Webhook::create([

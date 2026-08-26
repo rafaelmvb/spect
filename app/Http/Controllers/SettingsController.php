@@ -60,7 +60,6 @@ class SettingsController extends Controller
         return Inertia::render('Settings/Index', [
             'currency_catalog_presets' => CheckoutCurrencyCatalog::presetsMap(),
             'current_version' => $currentVersion,
-            'updates_enabled' => config('getfy.updates_enabled', true),
             'git_available' => $gitAvailable,
             'docker_mode' => $dockerMode,
             'app_url' => $appUrl,

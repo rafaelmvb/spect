@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Plugins\PluginRegistry;
-use App\Services\PluginStoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -38,11 +37,6 @@ class PluginsController extends Controller
             ];
         }, $plugins);
 
-        $store = app(PluginStoreService::class);
-        $pluginStore = [
-            'store_url' => rtrim(config('services.plugin_store.url', ''), '/'),
-            'submit_url' => $store->getSubmitPluginUrl(),
-        ];
         $bundled = PluginRegistry::bundledPluginsPath();
         $installRoot = PluginRegistry::userInstallRoot();
         $pluginsBundledResolved = (is_dir($bundled) ? realpath($bundled) : null) ?: $bundled;
@@ -62,25 +56,6 @@ class PluginsController extends Controller
             'plugins_bundled_path' => $pluginsBundledResolved,
             'plugins_install_path' => $pluginsInstallResolved,
         ]);
-    }
-
-    /**
-     * GET /gerenciar-plugins/store-plugins-list — JSON para o frontend carregar a lista da loja sob demanda.
-     */
-    public function storePluginsList(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
-    {
-        $store = app(PluginStoreService::class);
-        if (! $store->isConfigured()) {
-            return response()->json(['data' => [], 'error' => 'Loja não configurada. Defina PLUGIN_STORE_URL no .env (ex.: http://plugins-getfy.test).']);
-        }
-        $response = $store->listPlugins(
-            $request->query('category') ?: null,
-            $request->query('search') ?: null
-        );
-        $data = isset($response['data']) && is_array($response['data']) ? $response['data'] : [];
-        $error = $response['error'] ?? null;
-
-        return response()->json(['data' => $data, 'error' => $error]);
     }
 
     /**
