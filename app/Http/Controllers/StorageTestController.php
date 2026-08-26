@@ -21,7 +21,6 @@ class StorageTestController extends Controller
             ]);
         }
 
-        $cloudMode = (bool) config('getfy.cloud_mode', false);
         $r2EnvKey = (string) env('R2_ACCESS_KEY_ID', '');
         $r2EnvSecret = (string) env('R2_SECRET_ACCESS_KEY', '');
         $r2EnvBucket = (string) env('R2_BUCKET', '');
@@ -32,8 +31,7 @@ class StorageTestController extends Controller
         $bucketInput = (string) $request->input('storage_s3_bucket', '');
         $endpointInput = (string) $request->input('storage_s3_endpoint', '');
 
-        $useEnvR2 = $cloudMode
-            && $provider === 'r2'
+        $useEnvR2 = $provider === 'r2'
             && $r2EnvConfigured
             && trim($keyInput) === ''
             && trim($bucketInput) === ''

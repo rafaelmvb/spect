@@ -220,67 +220,6 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|team', 'audit.log'])->gro
     Route::post('/painel/notifications/mark-read', [\App\Http\Controllers\PanelNotificationsController::class, 'markReadBatch'])->name('panel.notifications.mark-read-batch');
     Route::post('/painel/notifications/mark-all-read', [\App\Http\Controllers\PanelNotificationsController::class, 'markAllRead'])->name('panel.notifications.mark-all-read');
     Route::delete('/painel/notifications', [\App\Http\Controllers\PanelNotificationsController::class, 'clearAll'])->name('panel.notifications.clear-all');
-    Route::get('/cloud/billing/status', function (Request $request) {
-        if (! config('getfy.cloud_mode')) {
-            abort(404);
-        }
-
-        $token = (string) env('GETFY_CLOUD_INSTALL_TOKEN', '');
-        $base = (string) config('getfy.cloud.orch_api_base_url', '');
-        if ($token === '' || $base === '') {
-            return response()->json(['enabled' => false]);
-        }
-
-        $cacheMinutes = max(1, (int) config('getfy.cloud.billing_cache_minutes', 10));
-        $cacheKey = 'cloud:billing:status';
-        $lastGoodKey = 'cloud:billing:status:last_good';
-
-        try {
-            $payload = Cache::remember($cacheKey, now()->addMinutes($cacheMinutes), function () use ($base, $token, $lastGoodKey) {
-                $url = $base.'/v1/public/billing/status';
-                $hostHeader = parse_url($url, PHP_URL_HOST);
-                $headers = array_filter([
-                    'Authorization' => 'Bearer '.$token,
-                    'Host' => $hostHeader ?: null,
-                ]);
-
-                $res = Http::timeout(10)
-                    ->connectTimeout(5)
-                    ->withHeaders($headers)
-                    ->get($url);
-
-                if ($res->status() === 401) {
-                    return ['enabled' => false];
-                }
-
-                if (! $res->successful()) {
-                    throw new \RuntimeException('Orchestrator retornou HTTP '.$res->status().'.');
-                }
-
-                $json = $res->json();
-                if (! is_array($json)) {
-                    throw new \RuntimeException('Resposta inválida do Orchestrator.');
-                }
-
-                $payload = ['enabled' => true] + $json;
-                $payload['portalUrl'] = 'http://getfy.cloud/login';
-                Cache::put($lastGoodKey, $payload, now()->addMinutes(60));
-
-                return $payload;
-            });
-
-            return response()->json(is_array($payload) ? $payload : ['enabled' => false]);
-        } catch (\Throwable $e) {
-            $last = Cache::get($lastGoodKey);
-            if (is_array($last) && isset($last['enabled'])) {
-                return response()->json($last);
-            }
-
-            report($e);
-
-            return response()->json(['enabled' => false]);
-        }
-    })->name('cloud.billing.status')->middleware('throttle:60,1');
     Route::get('/conquistas', [\App\Http\Controllers\ConquistasController::class, 'index'])->name('conquistas.index');
     Route::get('/meu-perfil', [\App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
     Route::post('/meu-perfil', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');

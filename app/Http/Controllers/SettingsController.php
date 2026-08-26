@@ -35,7 +35,6 @@ class SettingsController extends Controller
         $currencies = CheckoutCurrencyCatalog::currenciesForCheckout($currencies);
 
         $gitAvailable = is_dir(base_path('.git'));
-        $cloudMode = (bool) config('getfy.cloud_mode', false);
         $dockerMode = DockerSetupState::isDocker();
         $cronSecret = config('getfy.cron_secret');
         $appUrl = rtrim(config('app.url'), '/');
@@ -46,15 +45,9 @@ class SettingsController extends Controller
             $currentVersion = (string) config('getfy.version');
         }
 
-        $r2EnvKey = (string) env('R2_ACCESS_KEY_ID', '');
-        $r2EnvSecret = (string) env('R2_SECRET_ACCESS_KEY', '');
-        $r2EnvBucket = (string) env('R2_BUCKET', '');
-        $r2EnvEndpoint = (string) env('R2_ENDPOINT', '');
-        $r2EnvConfigured = $r2EnvKey !== '' && $r2EnvSecret !== '' && $r2EnvBucket !== '' && $r2EnvEndpoint !== '';
-
         $storageProviderSetting = Setting::get('storage_provider', null, $tenantId);
         $effectiveStorageProvider = ($storageProviderSetting === null || $storageProviderSetting === '')
-            ? ($cloudMode && $r2EnvConfigured ? 'r2' : 'local')
+            ? 'local'
             : $storageProviderSetting;
 
         $storageS3Key = (string) Setting::get('storage_s3_key', '', $tenantId);
@@ -64,21 +57,11 @@ class SettingsController extends Controller
         $storageS3Url = (string) Setting::get('storage_s3_url', '', $tenantId);
         $storageS3SecretRaw = (string) Setting::get('storage_s3_secret', '', $tenantId);
 
-        $cloudR2Managed = $cloudMode
-            && $r2EnvConfigured
-            && $effectiveStorageProvider === 'r2'
-            && trim($storageS3Key) === ''
-            && trim($storageS3Bucket) === ''
-            && trim($storageS3Endpoint) === ''
-            && trim($storageS3Url) === ''
-            && trim($storageS3SecretRaw) === '';
-
         return Inertia::render('Settings/Index', [
             'currency_catalog_presets' => CheckoutCurrencyCatalog::presetsMap(),
             'current_version' => $currentVersion,
             'updates_enabled' => config('getfy.updates_enabled', true),
             'git_available' => $gitAvailable,
-            'cloud_mode' => $cloudMode,
             'docker_mode' => $dockerMode,
             'app_url' => $appUrl,
             'base_path' => base_path(),
@@ -104,12 +87,11 @@ class SettingsController extends Controller
                 'checkout_translations' => $checkoutTranslations,
                 'currencies' => $currencies,
                 'storage_provider' => $effectiveStorageProvider,
-                'storage_s3_key' => $cloudR2Managed ? '' : $storageS3Key,
-                'storage_s3_bucket' => $cloudR2Managed ? '' : $storageS3Bucket,
+                'storage_s3_key' => $storageS3Key,
+                'storage_s3_bucket' => $storageS3Bucket,
                 'storage_s3_region' => $effectiveStorageProvider === 'r2' ? 'auto' : $storageS3Region,
-                'storage_s3_endpoint' => $cloudR2Managed ? '' : $storageS3Endpoint,
-                'storage_s3_url' => $cloudR2Managed ? '' : $storageS3Url,
-                'storage_cloud_r2_managed' => $cloudR2Managed,
+                'storage_s3_endpoint' => $storageS3Endpoint,
+                'storage_s3_url' => $storageS3Url,
             ],
         ]);
     }

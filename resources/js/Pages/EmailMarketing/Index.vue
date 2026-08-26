@@ -10,7 +10,6 @@ defineOptions({ layout: LayoutInfoprodutor });
 const props = defineProps({
     campaigns: { type: Array, default: () => [] },
     email_configured: { type: Boolean, default: false },
-    cloud_mode: { type: Boolean, default: false },
     cron_instructions: { type: String, default: '' },
     app_url: { type: String, default: '' },
     cron_url: { type: String, default: null },
@@ -88,13 +87,6 @@ function confirmSend(campaign) {
         </div>
 
         <div v-show="activeTab === 'campanhas'" class="space-y-4">
-            <div
-                v-if="cloud_mode"
-                class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200"
-            >
-                Se você estiver usando o Getfy em modo cloud, não é necessário configurar o cron; o envio já vem
-                configurado automaticamente.
-            </div>
 
             <div v-if="campaigns.length === 0" class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white p-8 text-center dark:bg-zinc-800/50">
                 <p class="text-zinc-600 dark:text-zinc-400">Nenhuma campanha ainda.</p>
@@ -144,16 +136,6 @@ function confirmSend(campaign) {
         </div>
 
         <div v-show="activeTab === 'configuracao'" class="space-y-6">
-            <div
-                v-if="cloud_mode"
-                class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30"
-            >
-                <p class="font-medium text-emerald-800 dark:text-emerald-200">Modo cloud</p>
-                <p class="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
-                    Se você estiver usando o Getfy em modo cloud, não é necessário configurar o cron; o envio já vem
-                    configurado automaticamente.
-                </p>
-            </div>
 
             <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white p-4 dark:bg-zinc-800/50">
                 <h2 class="text-lg font-semibold text-zinc-900 dark:text-white">Status</h2>

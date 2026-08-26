@@ -10,7 +10,6 @@ import PwaInstallPrompt from '@/components/layout/PwaInstallPrompt.vue';
 import NotificationsPanel from '@/components/layout/NotificationsPanel.vue';
 import Backdrop from '@/components/layout/Backdrop.vue';
 import FlashToast from '@/components/layout/FlashToast.vue';
-import CloudBillingBanner from '@/components/layout/CloudBillingBanner.vue';
 
 const { isExpanded } = useSidebarProvider();
 usePanelPushSubscribe();
@@ -56,7 +55,6 @@ watchEffect(() => {
         >
             <div class="flex w-full shrink-0 flex-col gap-2">
                 <div class="-mx-3 md:-mx-4 lg:-mx-6">
-                    <CloudBillingBanner />
                 </div>
                 <AppHeader :page-title="pageTitle" :page-title-badge="pageTitleBadge" />
                 <slot name="header-actions" />

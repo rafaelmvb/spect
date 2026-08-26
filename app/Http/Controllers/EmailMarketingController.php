@@ -28,7 +28,6 @@ class EmailMarketingController extends Controller
         $user = auth()->user();
         $tenantId = $user->tenant_id;
         $emailConfigured = $this->mailConfig->isEmailConfigured($tenantId);
-        $cloudMode = config('getfy.cloud_mode', false);
 
         $campaigns = EmailCampaign::forTenant($tenantId)
             ->orderByDesc('created_at')
@@ -68,7 +67,6 @@ class EmailMarketingController extends Controller
         return Inertia::render('EmailMarketing/Index', [
             'campaigns' => $campaigns,
             'email_configured' => $emailConfigured,
-            'cloud_mode' => $cloudMode,
             'cron_instructions' => $cronInstructions,
             'app_url' => $appUrl,
             'base_path' => base_path(),

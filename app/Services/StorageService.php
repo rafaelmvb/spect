@@ -22,31 +22,6 @@ class StorageService
     }
 
     /**
-     * @return array{configured: bool, key: string, secret: string, bucket: string, endpoint: string, url: string, region: string}
-     */
-    private function r2EnvConfig(): array
-    {
-        $key = (string) env('R2_ACCESS_KEY_ID', '');
-        $secret = (string) env('R2_SECRET_ACCESS_KEY', '');
-        $bucket = (string) env('R2_BUCKET', '');
-        $endpoint = (string) env('R2_ENDPOINT', '');
-        $url = (string) env('R2_PUBLIC_URL', '');
-        $region = (string) env('R2_REGION', 'auto');
-
-        $configured = $key !== '' && $secret !== '' && $bucket !== '' && $endpoint !== '';
-
-        return [
-            'configured' => $configured,
-            'key' => $key,
-            'secret' => $secret,
-            'bucket' => $bucket,
-            'endpoint' => $endpoint,
-            'url' => $url,
-            'region' => $region ?: 'auto',
-        ];
-    }
-
-    /**
      * Get the active storage disk for the current tenant.
      */
     public function disk(): Filesystem
@@ -55,12 +30,9 @@ class StorageService
             return $this->disk;
         }
 
-        $cloudMode = (bool) config('getfy.cloud_mode', false);
-        $r2Env = $this->r2EnvConfig();
-
         $provider = Setting::get('storage_provider', null, $this->tenantId);
         if ($provider === null || $provider === '') {
-            $provider = ($cloudMode && $r2Env['configured']) ? 'r2' : 'local';
+            $provider = 'local';
         }
 
         if ($provider === 'local' || empty($provider)) {
@@ -84,24 +56,6 @@ class StorageService
         $region = Setting::get('storage_s3_region', 'us-east-1', $this->tenantId);
         $endpoint = Setting::get('storage_s3_endpoint', '', $this->tenantId);
         $url = Setting::get('storage_s3_url', '', $this->tenantId);
-
-        $useEnvR2 = $cloudMode
-            && $provider === 'r2'
-            && $r2Env['configured']
-            && trim((string) $key) === ''
-            && trim((string) $bucket) === ''
-            && trim((string) $endpoint) === ''
-            && trim((string) $url) === ''
-            && trim((string) $secretRaw) === '';
-
-        if ($useEnvR2) {
-            $key = $r2Env['key'];
-            $secret = $r2Env['secret'];
-            $bucket = $r2Env['bucket'];
-            $endpoint = $r2Env['endpoint'];
-            $url = $r2Env['url'];
-            $region = $r2Env['region'];
-        }
 
         if (empty($key) || empty($secret) || empty($bucket)) {
             $this->disk = Storage::disk('public');

@@ -44,10 +44,6 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    cloud_mode: {
-        type: Boolean,
-        default: false,
-    },
     docker_mode: {
         type: Boolean,
         default: false,
@@ -149,7 +145,6 @@ const form = useForm({
     storage_s3_url: props.settings.storage_s3_url ?? '',
 });
 
-const showCloudR2Override = ref(false);
 
 const testForm = useForm({
     test_to: '',
@@ -511,7 +506,7 @@ const storageMigrateLoading = vueRef(false);
 async function testStorageConnection() {
     storageTestResult.value = { status: null, message: '' };
     const provider = form.storage_provider;
-    if (provider !== 'local' && !isCloudManagedR2.value) {
+    if (provider !== 'local') {
         const key = (form.storage_s3_key ?? '').trim();
         const bucket = (form.storage_s3_bucket ?? '').trim();
         if (!key || !bucket) {
@@ -525,9 +520,7 @@ async function testStorageConnection() {
     storageTestLoading.value = true;
     const region =
         provider === 'r2' ? 'auto' : (form.storage_s3_region && form.storage_s3_region.trim()) || 'us-east-1';
-    const payload = isCloudManagedR2.value
-        ? { storage_provider: 'r2' }
-        : {
+    const payload = {
             storage_provider: provider,
             storage_s3_key: form.storage_s3_key ?? '',
             storage_s3_secret: form.storage_s3_secret ?? '',
@@ -553,7 +546,6 @@ async function testStorageConnection() {
 
 function onStorageProviderChange(providerId) {
     form.storage_provider = providerId;
-    showCloudR2Override.value = false;
     const prov = storageProviders.find((p) => p.id === providerId);
     if (prov?.endpoint && !form.storage_s3_endpoint) {
         form.storage_s3_endpoint = prov.endpoint;
@@ -570,19 +562,11 @@ const isStorageRemote = computed(
         form.storage_provider === 'r2',
 );
 
-const isCloudManagedR2 = computed(
-    () =>
-        !!props.cloud_mode &&
-        !!props.settings.storage_cloud_r2_managed &&
-        form.storage_provider === 'r2' &&
-        showCloudR2Override.value === false,
-);
 const canMigrateStorage = computed(
     () =>
         isStorageRemote.value &&
-        (isCloudManagedR2.value ||
-            ((form.storage_s3_key ?? '').trim() !== '' &&
-                (form.storage_s3_bucket ?? '').trim() !== '')),
+        (form.storage_s3_key ?? '').trim() !== '' &&
+        (form.storage_s3_bucket ?? '').trim() !== '',
 );
 
 async function migrateStorageToRemote() {
@@ -811,28 +795,7 @@ const selectClass =
                             </div>
 
                             <div v-if="form.storage_provider !== 'local'" class="space-y-4 rounded-xl border border-zinc-200 bg-zinc-50/50 p-5 dark:border-zinc-600 dark:bg-zinc-800/50">
-                                <div
-                                    v-if="isCloudManagedR2"
-                                    class="flex items-start justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/50 dark:bg-emerald-900/20"
-                                >
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-medium text-emerald-900 dark:text-emerald-100">
-                                            Parabéns, você está usando o Getfy Cloud com Cloudflare R2.
-                                        </p>
-                                        <p class="mt-1 text-sm text-emerald-800 dark:text-emerald-200">
-                                            As credenciais foram provisionadas automaticamente.
-                                        </p>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="shrink-0 inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-white px-4 py-2.5 text-sm font-medium text-emerald-700 transition hover:border-emerald-400 hover:text-emerald-800 dark:border-emerald-700 dark:bg-zinc-800 dark:text-emerald-200 dark:hover:border-emerald-600"
-                                        @click="showCloudR2Override = true"
-                                    >
-                                        Usar minhas credenciais
-                                    </button>
-                                </div>
-
-                                <template v-else>
+                                <template>
                                     <h3 class="text-sm font-medium text-zinc-900 dark:text-white">Credenciais S3</h3>
                                     <div class="grid gap-4 sm:grid-cols-2">
                                         <div>
@@ -1237,7 +1200,7 @@ const selectClass =
                             </p>
                         </div>
                         <div
-                            v-if="cloud_mode || docker_mode"
+                            v-if="docker_mode"
                             class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/50 dark:bg-emerald-950/30"
                         >
                             <p class="text-sm font-medium text-emerald-800 dark:text-emerald-200">
