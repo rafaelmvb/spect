@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import LayoutInfoprodutor from '@/Layouts/LayoutInfoprodutor.vue';
 import Button from '@/components/ui/Button.vue';
+import ImportarTestesPanel from '@/components/clinical/ImportarTestesPanel.vue';
 import {
     ClipboardList, Plus, Pencil, Trash2, X, Loader2,
     Search, Eye, EyeOff, ChevronDown, ChevronUp,
@@ -20,6 +21,9 @@ const props = defineProps({
 
 // ─── Busca
 const search = ref(props.q ?? '');
+
+// Importacao em massa: fechada por padrao para nao competir com a lista.
+const mostrarImportacao = ref(false);
 let searchTimer = null;
 watch(search, (v) => {
     clearTimeout(searchTimer);
@@ -310,6 +314,17 @@ async function togglePanel(test, type) {
 </script>
 
 <template>
+    <!-- Importacao em massa -->
+    <div class="mb-6">
+        <button type="button" @click="mostrarImportacao = !mostrarImportacao"
+            class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] dark:border-zinc-600 dark:text-zinc-200">
+            {{ mostrarImportacao ? 'Fechar importacao' : 'Importar testes em massa' }}
+        </button>
+        <div v-if="mostrarImportacao" class="mt-4 rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800/50">
+            <ImportarTestesPanel @importado="router.reload()" />
+        </div>
+    </div>
+
     <div class="p-4 lg:p-8 max-w-5xl mx-auto space-y-6">
 
         <!-- Toast -->

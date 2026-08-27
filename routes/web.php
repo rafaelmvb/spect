@@ -395,6 +395,11 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|team', 'audit.log'])->gro
         Route::post('/configuracoes/email/connection-test', [\App\Http\Controllers\EmailTestController::class, 'connectionTest'])->name('settings.email.connection-test');
         Route::post('/configuracoes/email/send-test', [\App\Http\Controllers\EmailTestController::class, 'sendTest'])->name('settings.email.send-test');
         Route::post('/configuracoes/storage/test', [\App\Http\Controllers\StorageTestController::class, '__invoke'])->name('settings.storage.test');
+
+        // Teleconsulta: credenciais do Google Cloud
+        Route::get('/configuracoes/teleconsulta', [\App\Http\Controllers\TeleconsultaSettingsController::class, 'mostrar'])->name('settings.teleconsulta');
+        Route::put('/configuracoes/teleconsulta', [\App\Http\Controllers\TeleconsultaSettingsController::class, 'salvar'])->name('settings.teleconsulta.save');
+        Route::delete('/configuracoes/teleconsulta', [\App\Http\Controllers\TeleconsultaSettingsController::class, 'remover'])->name('settings.teleconsulta.remove');
         Route::post('/configuracoes/storage/migrate', [\App\Http\Controllers\StorageMigrateController::class, '__invoke'])->name('settings.storage.migrate');
         Route::post('/configuracoes/update/migrate', \App\Http\Controllers\MigrateController::class)->name('settings.update.migrate')->middleware('throttle:10,1');
         Route::get('/configuracoes/gateways/{slug}', [\App\Http\Controllers\GatewaysController::class, 'show'])->name('gateways.show');
@@ -621,6 +626,9 @@ Route::middleware(['auth', 'admin.tenant', 'role:admin|team', 'audit.log'])->gro
     // Testes Clínicos
     Route::middleware(['role:admin'])->group(function () {
         Route::get('/testes-clinicos', [\App\Http\Controllers\ClinicalTestsController::class, 'index'])->name('clinical-tests.index');
+        Route::get('/testes-clinicos/importar/modelo', [\App\Http\Controllers\ClinicalTestImportController::class, 'modelo'])->name('clinical-tests.import.modelo');
+        Route::post('/testes-clinicos/importar/conferir', [\App\Http\Controllers\ClinicalTestImportController::class, 'conferir'])->name('clinical-tests.import.conferir')->middleware('throttle:20,1');
+        Route::post('/testes-clinicos/importar', [\App\Http\Controllers\ClinicalTestImportController::class, 'importar'])->name('clinical-tests.import')->middleware('throttle:10,1');
         Route::get('/testes-clinicos/{clinicalTest}/editar', [\App\Http\Controllers\ClinicalTestsController::class, 'edit'])->name('clinical-tests.edit');
         Route::post('/testes-clinicos', [\App\Http\Controllers\ClinicalTestsController::class, 'store'])->name('clinical-tests.store');
         Route::put('/testes-clinicos/{clinicalTest}', [\App\Http\Controllers\ClinicalTestsController::class, 'update'])->name('clinical-tests.update');

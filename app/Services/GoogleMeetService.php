@@ -46,21 +46,40 @@ class GoogleMeetService
         return $this->clientId() !== '' && $this->clientSecret() !== '';
     }
 
+    /**
+     * As credenciais podem vir do painel (Configuracoes > Teleconsulta) ou do
+     * .env. O painel vence: e onde o admin consegue trocar sem acesso ao
+     * servidor. O client_secret fica cifrado (ver SecretSetting).
+     */
     private function clientId(): string
     {
-        return (string) config('services.google_meet.client_id', '');
+        $doPainel = (string) (\App\Models\Setting::get('google_meet_client_id', '', $this->tenantId()) ?? '');
+
+        return $doPainel !== '' ? $doPainel : (string) config('services.google_meet.client_id', '');
     }
 
     private function clientSecret(): string
     {
-        return (string) config('services.google_meet.client_secret', '');
+        $doPainel = (string) (\App\Support\SecretSetting::get('google_meet_client_secret', $this->tenantId()) ?? '');
+
+        return $doPainel !== '' ? $doPainel : (string) config('services.google_meet.client_secret', '');
     }
 
     private function redirectUri(): string
     {
-        $configurado = (string) config('services.google_meet.redirect', '');
+        $doPainel = (string) (\App\Models\Setting::get('google_meet_redirect', '', $this->tenantId()) ?? '');
+        if ($doPainel !== '') {
+            return $doPainel;
+        }
 
-        return $configurado !== '' ? $configurado : url('/p/meet/callback');
+        $doEnv = (string) config('services.google_meet.redirect', '');
+
+        return $doEnv !== '' ? $doEnv : url('/p/meet/callback');
+    }
+
+    private function tenantId(): ?int
+    {
+        return auth()->user()?->tenant_id;
     }
 
     // ---------------------------------------------------------------- OAuth

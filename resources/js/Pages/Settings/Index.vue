@@ -15,11 +15,11 @@ import {
     Upload,
     Download,
     Palette,
-    GraduationCap,
-} from 'lucide-vue-next';
+    GraduationCap, Video } from 'lucide-vue-next';
 import IntegrationCard from '@/components/IntegrationCard.vue';
 import EmailProviderSidebar from '@/components/EmailProviderSidebar.vue';
 import MemberAreaSettingsPanel from '@/components/settings/MemberAreaSettingsPanel.vue';
+import TeleconsultaPanel from '@/components/settings/TeleconsultaPanel.vue';
 
 defineOptions({ layout: LayoutInfoprodutor });
 
@@ -63,7 +63,7 @@ const props = defineProps({
 });
 
 function allAllowedTabIds() {
-    const core = ['email', 'storage', 'traducoes', 'moedas', 'cron', 'update', 'area-aluno'];
+    const core = ['email', 'storage', 'traducoes', 'moedas', 'cron', 'teleconsulta', 'update', 'area-aluno'];
     const extra = (props.settings_plugin_tabs || []).map((t) => t.id).filter(Boolean);
     return [...core, ...extra];
 }
@@ -158,6 +158,7 @@ const coreTabsStatic = [
     { id: 'traducoes', label: 'Traduções', icon: Languages },
     { id: 'moedas', label: 'Moedas', icon: Banknote },
     { id: 'cron', label: 'Cron', icon: Clock },
+    { id: 'teleconsulta', label: 'Teleconsulta', icon: Video },
     { id: 'area-aluno', label: 'Área do Aluno', icon: GraduationCap },
 ];
 
@@ -1100,6 +1101,12 @@ const selectClass =
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
         >
+            <div v-show="activeTab === 'teleconsulta'" class="w-full max-w-full space-y-6">
+                <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/50">
+                    <TeleconsultaPanel />
+                </section>
+            </div>
+
             <div v-show="activeTab === 'cron'" class="w-full max-w-full space-y-6">
                 <section class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-800/50">
                     <div class="border-b border-zinc-200 bg-zinc-50 px-6 py-5 dark:border-zinc-700 dark:bg-zinc-800">
