@@ -1,0 +1,130 @@
+/*
+ * Paleta da Área do Profissional.
+ *
+ * Vem do documento "Paleta de Cores — Área do Profissional": tons frios e
+ * neutros de baixa saturação, pensados para leitura prolongada de prontuário,
+ * e semânticos separados do azul de identidade para que estado de paciente e
+ * alerta se leiam sem depender da cor da marca.
+ *
+ * Escopo aplicável: só o painel do profissional (rotas /p/*), via .area-profissional
+ * no layout — o painel administrativo mantém a identidade dele.
+ */
+.area-profissional {
+    /* 1. Neutras de base */
+    --ap-fundo: #F4F6F9;
+    --ap-superficie: #FFFFFF;
+    --ap-texto: #1E293B;
+    --ap-texto-2: #64748B;
+
+    /* 2. Azuis de identidade e ação */
+    --ap-marinho: #0F172A;
+    --ap-safira: #1D4ED8;
+    --ap-cobalto: #2563EB;
+    --ap-azul-suave: #E0F2FE;
+
+    /* 3. Suporte e alertas */
+    --ap-sucesso: #10B981;
+    --ap-alerta: #F59E0B;
+    --ap-critico: #EF4444;
+
+    --ap-linha: #DDE3EC;
+
+    background: var(--ap-fundo);
+    color: var(--ap-texto);
+}
+
+/*
+ * No escuro os papéis se mantêm: o marinho vira o fundo, e os azuis clareiam
+ * para seguir legíveis sobre ele. Sem isso, texto de um tema cairia sobre o
+ * fundo do outro.
+ */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .area-profissional {
+        --ap-fundo: #0B1220;
+        --ap-superficie: #131C2C;
+        --ap-texto: #E6EDF7;
+        --ap-texto-2: #94A3B8;
+        --ap-safira: #7BA4FF;
+        --ap-cobalto: #93B4FF;
+        --ap-azul-suave: #16273F;
+        --ap-linha: #26334A;
+        --ap-sucesso: #34D399;
+        --ap-alerta: #FBBF24;
+        --ap-critico: #F87171;
+    }
+}
+
+:root[data-theme="dark"] .area-profissional {
+    --ap-fundo: #0B1220;
+    --ap-superficie: #131C2C;
+    --ap-texto: #E6EDF7;
+    --ap-texto-2: #94A3B8;
+    --ap-safira: #7BA4FF;
+    --ap-cobalto: #93B4FF;
+    --ap-azul-suave: #16273F;
+    --ap-linha: #26334A;
+    --ap-sucesso: #34D399;
+    --ap-alerta: #FBBF24;
+    --ap-critico: #F87171;
+}
+
+/* Superfícies: card de agendamento, bloco de prontuário, formulário. */
+.area-profissional .ap-card {
+    background: var(--ap-superficie);
+    border: 1px solid var(--ap-linha);
+    border-radius: 14px;
+}
+
+.area-profissional .ap-titulo { color: var(--ap-texto); }
+.area-profissional .ap-legenda { color: var(--ap-texto-2); }
+
+/* Ação principal: salvar prontuário, iniciar consulta. */
+.area-profissional .ap-botao-primario {
+    background: var(--ap-marinho);
+    color: #fff;
+}
+.area-profissional .ap-botao-primario:hover { background: var(--ap-safira); }
+
+/* Secundário: links, ícones ativos, destaques. */
+.area-profissional .ap-botao-secundario {
+    border: 1px solid var(--ap-linha);
+    color: var(--ap-safira);
+    background: transparent;
+}
+.area-profissional .ap-botao-secundario:hover { border-color: var(--ap-safira); }
+
+/* Selo de credencial (CRM/CRP) e badge da comunidade. */
+.area-profissional .ap-selo {
+    background: var(--ap-cobalto);
+    color: #fff;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .15rem .6rem;
+    letter-spacing: .02em;
+}
+
+/* Seleção e hover em lista. */
+.area-profissional .ap-selecionado,
+.area-profissional .ap-hover:hover { background: var(--ap-azul-suave); }
+
+/* Estados: paciente on-line, consulta confirmada, alerta, ação crítica. */
+.area-profissional .ap-status-ok { color: var(--ap-sucesso); }
+.area-profissional .ap-status-alerta { color: var(--ap-alerta); }
+.area-profissional .ap-status-critico { color: var(--ap-critico); }
+
+.area-profissional .ap-ponto {
+    display: inline-block;
+    width: .5rem;
+    height: .5rem;
+    border-radius: 999px;
+}
+.area-profissional .ap-ponto-ok { background: var(--ap-sucesso); }
+.area-profissional .ap-ponto-alerta { background: var(--ap-alerta); }
+.area-profissional .ap-ponto-critico { background: var(--ap-critico); }
+
+/* Encerrar consulta, cancelar horário, remover registro. */
+.area-profissional .ap-botao-critico {
+    background: var(--ap-critico);
+    color: #fff;
+}

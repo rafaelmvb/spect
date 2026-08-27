@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* Paleta da Area do Profissional (documento de referencia visual). */
+@import './area-profissional.css';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';

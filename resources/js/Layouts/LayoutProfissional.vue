@@ -30,7 +30,9 @@ function isActive(href) {
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <!-- O fundo vem da paleta clinica (.area-profissional), nao do Tailwind:
+         bg-zinc-50 sobrescreveria o token por vir depois na cascata. -->
+    <div class="area-profissional flex min-h-screen">
         <!-- Sidebar desktop -->
         <aside class="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 z-30">
             <!-- Logo / Cabeçalho -->
