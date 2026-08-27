@@ -820,6 +820,10 @@ Route::prefix('m')->middleware(['member.area.resolve.from.user', 'member.area.ac
     Route::post('testes/sessoes/{sessionId}/compartilhar', [\App\Http\Controllers\TestResultShareController::class, 'generate'])->whereNumber('sessionId');
     Route::post('testes/{testId}/gerar-relatorio', [\App\Http\Controllers\MemberClinicalTestsController::class, 'generateReport'])->middleware('throttle:5,1')->whereNumber('testId');
     Route::post('humor/checkin', [\App\Http\Controllers\MemberMoodController::class, 'checkin'])->middleware('throttle:10,1');
+    // Telemetria de comportamento: grava sob identificador tecnico, sem dado cadastral.
+    Route::post('telemetria', \App\Http\Controllers\TelemetryController::class)
+        ->middleware('throttle:120,1')
+        ->name('member-area-app.telemetria');
     Route::get('mapa-neuro', [\App\Http\Controllers\MemberNeuroMapController::class, 'show']);
     Route::get('profissionais', [\App\Http\Controllers\MemberProfessionalsController::class, 'index']);
     Route::get('profissionais/{professionalId}', [\App\Http\Controllers\MemberProfessionalsController::class, 'show'])->whereNumber('professionalId');

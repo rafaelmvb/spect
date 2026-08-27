@@ -995,6 +995,9 @@ class MemberAreaAppController extends Controller
         }
         $this->progressService->markLessonCompleted($lesson->id, $user);
 
+        // Telemetria: conclusao e o sinal mais forte de que o tema engajou.
+        $this->registrarConclusaoNaTelemetria($user, $lesson);
+
         $this->logMemberActivity($request, $product, $user, 'member_area.lesson_complete', [
             'lesson_id' => $lesson->id,
             'lesson_product_id' => $lesson->product_id,
@@ -1038,6 +1041,9 @@ class MemberAreaAppController extends Controller
         );
 
         $this->progressService->markLessonCompleted($lesson->id, $user);
+
+        // Telemetria: conclusao e o sinal mais forte de que o tema engajou.
+        $this->registrarConclusaoNaTelemetria($user, $lesson);
         $newlyUnlocked = $this->gamificationService->checkAndUnlock($product, $user);
         $percent = $this->progressService->completionPercent($product, $user);
 
@@ -2394,5 +2400,32 @@ class MemberAreaAppController extends Controller
         }
 
         return $urls;
+    }
+
+    /**
+     * Registra a conclusao em event_logs e recalibra os pesos das tags do aluno.
+     *
+     * Falhar aqui nao pode impedir a aula de ser marcada como concluida — o
+     * TelemetryService ja engole a excecao internamente.
+     */
+    private function registrarConclusaoNaTelemetria(\App\Models\User $user, MemberLesson $lesson): void
+    {
+        app(\App\Services\TelemetryService::class)->registrar(
+            $user,
+            \App\Services\TelemetryService::LESSON_COMPLETE,
+            [
+                'subject_type' => 'member_lesson',
+                'subject_id' => (string) $lesson->id,
+                'value' => 100,
+            ]
+        );
+
+        app(\App\Services\TagWeightService::class)->calibrarPorConsumo(
+            (int) $user->id,
+            $user->tenant_id,
+            'member_lesson',
+            (string) $lesson->id,
+            1.0,
+        );
     }
 }
