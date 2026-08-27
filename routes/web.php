@@ -757,6 +757,14 @@ Route::prefix('p')->middleware(['auth', 'role:profissional'])->name('profissiona
     // Meus Pacientes
     Route::get('/meus-pacientes', [\App\Http\Controllers\ProfessionalPanelController::class, 'meusPacientes'])->name('meus-pacientes');
     Route::post('/meus-pacientes/{patientId}/nota', [\App\Http\Controllers\ProfessionalPanelController::class, 'saveNote'])->name('meus-pacientes.note');
+
+    // Copiloto Clinico: perguntas sobre o caso, restrito a paciente com vinculo ativo.
+    Route::get('/meus-pacientes/{patientId}/copiloto', [\App\Http\Controllers\ClinicalCopilotController::class, 'historico'])
+        ->whereNumber('patientId')->name('copiloto.historico');
+    Route::post('/meus-pacientes/{patientId}/copiloto', [\App\Http\Controllers\ClinicalCopilotController::class, 'perguntar'])
+        ->whereNumber('patientId')->middleware('throttle:20,1')->name('copiloto.perguntar');
+    Route::delete('/meus-pacientes/{patientId}/copiloto', [\App\Http\Controllers\ClinicalCopilotController::class, 'limpar'])
+        ->whereNumber('patientId')->name('copiloto.limpar');
 });
 
 // Área de membros — rotas limpas (sem slug na URL): /m/{pagina}
