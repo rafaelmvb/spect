@@ -325,6 +325,8 @@ function onPdfReaderLastPage() {
                         <MemberAreaVideoPlayer
                             v-if="current_lesson.content_url"
                             :src="current_lesson.content_url"
+                            :telemetry-id="current_lesson.id"
+                            :telemetry-base="memberBase"
                             @ended="markComplete"
                         />
                         <div

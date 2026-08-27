@@ -1,14 +1,58 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { useTelemetriaDePlayer } from '@/composables/useTelemetria';
+import { computed, ref, onMounted, onUnmounted, onBeforeUnmount } from 'vue';
 import { getVideoProviderType } from '@/lib/utils';
 
 const props = defineProps({
     src:         { type: String,  default: '' },
     poster:      { type: String,  default: '' },
     playsinline: { type: Boolean, default: true },
+
+    // Telemetria de consumo: sem telemetryId o player nao registra nada.
+    telemetryType: { type: String, default: 'member_lesson' },
+    telemetryId:   { type: [String, Number], default: null },
+    telemetryBase: { type: String, default: '' },
 });
 
 const emit = defineEmits(['ended']);
+
+/*
+ * O vidstack renderiza um <video> real dentro do provider: ancorar nele
+ * funciona em qualquer versao, sem depender da API de eventos do custom
+ * element, que muda entre releases.
+ */
+const { conectar: conectarTelemetria, desconectar: desconectarTelemetria } = useTelemetriaDePlayer(
+    computed(() => props.telemetryBase),
+    { subjectType: props.telemetryType, subjectId: props.telemetryId },
+);
+
+const containerRef = ref(null);
+let observador = null;
+
+/** O <video> aparece depois que o vidstack monta: espera por ele. */
+function procurarMidia() {
+    const midia = containerRef.value?.querySelector('video, audio');
+    if (midia) {
+        conectarTelemetria(midia);
+        observador?.disconnect();
+        observador = null;
+        return true;
+    }
+    return false;
+}
+
+onMounted(() => {
+    if (!props.telemetryId) return;
+    if (procurarMidia()) return;
+
+    observador = new MutationObserver(() => procurarMidia());
+    observador.observe(containerRef.value, { childList: true, subtree: true });
+});
+
+onBeforeUnmount(() => {
+    observador?.disconnect();
+    desconectarTelemetria();
+});
 
 const providerType = computed(() => getVideoProviderType(props.src));
 /** YouTube/Vimeo no iOS: Fullscreen API no player inteiro falha; Vidstack usa fullscreen no iframe do provider. */
@@ -129,6 +173,7 @@ function onContextMenu(e) {
 
 <template>
     <div
+        ref="containerRef"
         class="member-area-video-player aspect-video w-full overflow-hidden rounded-lg relative"
         @contextmenu.prevent="onContextMenu"
     >

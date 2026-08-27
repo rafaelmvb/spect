@@ -28,6 +28,8 @@ class ProfessionalPanelController extends Controller
     private function fmtAppointment(Appointment $a): array
     {
         return [
+            'meet_uri' => $a->meet_uri,
+            'meet_code' => $a->meet_code,
             'id'               => $a->id,
             'client_name'      => $a->client_name,
             'client_email'     => $a->client_email,

@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import LayoutProfissional from '@/Layouts/LayoutProfissional.vue';
 import { Users, Tag, Save, ChevronDown, ChevronUp } from 'lucide-vue-next';
+import CopilotoChat from '@/components/clinical/CopilotoChat.vue';
 
 defineOptions({ layout: LayoutProfissional });
 
@@ -93,7 +94,7 @@ function moodPath(moods) {
 
                 <!-- Tabs -->
                 <div class="flex gap-1 pt-3 pb-4 border-b border-zinc-100 dark:border-zinc-800">
-                    <button v-for="t in [['humor','Humor'], ['testes','Testes'], ['nota','Nota Clínica']]" :key="t[0]"
+                    <button v-for="t in [['humor','Humor'], ['testes','Testes'], ['nota','Nota Clínica'], ['copiloto','Copiloto']]" :key="t[0]"
                         type="button" @click="setTab(patient.id, t[0])"
                         :class="['px-3 py-1.5 rounded-lg text-xs font-semibold transition', tab(patient.id) === t[0] ? 'bg-violet-600 text-white' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300']">
                         {{ t[1] }}
@@ -155,6 +156,11 @@ function moodPath(moods) {
                         {{ noteSaved[patient.id] ? 'Salvo!' : noteSaving[patient.id] ? 'Salvando…' : 'Salvar nota' }}
                     </button>
                 </div>
+                <!-- Copiloto Clinico -->
+                <div v-if="tab(patient.id) === 'copiloto'" class="pt-4">
+                    <CopilotoChat :paciente-id="patient.id" :paciente-nome="patient.name" />
+                </div>
+
             </div>
         </div>
     </div>

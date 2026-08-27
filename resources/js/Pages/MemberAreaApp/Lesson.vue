@@ -193,6 +193,8 @@ function formatCommentDate(iso) {
                     :src="lesson.content_url"
                     :watermark-enabled="!!lesson.watermark_enabled"
                     :watermark-data="lesson.student ?? null"
+                    :telemetry-id="lesson.id"
+                    :telemetry-base="memberBase"
                     @ended="markComplete"
                 />
                 <div

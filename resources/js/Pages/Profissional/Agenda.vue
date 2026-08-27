@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import LayoutProfissional from '@/Layouts/LayoutProfissional.vue';
-import { ChevronLeft, ChevronRight, CalendarDays, Check, X, CheckCheck } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, CalendarDays, Check, X, CheckCheck, Video } from 'lucide-vue-next';
 import { router } from '@inertiajs/vue3';
 
 defineOptions({ layout: LayoutProfissional });
@@ -22,6 +22,28 @@ const STATUS_COLORS = {
 };
 
 const selected = ref(null);
+
+// Sala de video (Google Meet)
+const criandoSala = ref(false);
+const erroSala = ref('');
+
+async function criarSala() {
+    if (!selected.value) return;
+    criandoSala.value = true;
+    erroSala.value = '';
+    try {
+        const { data } = await window.axios.post(`/p/agenda/${selected.value.id}/sala`);
+        selected.value.meet_uri = data.meet_uri;
+        // O calendario carrega uma copia: atualiza para o link nao sumir ao fechar.
+        const naLista = props.appointments.find((a) => a.id === selected.value.id);
+        if (naLista) naLista.meet_uri = data.meet_uri;
+        window.open(data.meet_uri, '_blank', 'noopener');
+    } catch (e) {
+        erroSala.value = e?.response?.data?.message || 'Não foi possível criar a sala.';
+    } finally {
+        criandoSala.value = false;
+    }
+}
 
 // Calendário
 const monthDate = computed(() => new Date(props.year, props.month - 1, 1));
@@ -142,6 +164,28 @@ async function updateStatus(id, status) {
                             <p class="text-xs font-medium text-zinc-400 uppercase tracking-wide">Serviço</p>
                             <p class="text-sm text-zinc-900 dark:text-white">{{ selected.service_name }}</p>
                         </div>
+                        <div class="rounded-xl border border-zinc-200 p-3 dark:border-zinc-700">
+                            <p class="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2">Sala de vídeo</p>
+
+                            <a v-if="selected.meet_uri" :href="selected.meet_uri" target="_blank" rel="noopener"
+                                class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700">
+                                <Video class="h-4 w-4" />
+                                Entrar na consulta
+                            </a>
+
+                            <button v-else type="button" :disabled="criandoSala" @click="criarSala"
+                                class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-blue-400 hover:text-blue-600 disabled:opacity-60 dark:border-zinc-600 dark:text-zinc-200">
+                                <Video class="h-4 w-4" />
+                                {{ criandoSala ? 'Criando…' : 'Criar sala de vídeo' }}
+                            </button>
+
+                            <p v-if="selected.meet_uri" class="mt-2 break-all text-xs text-zinc-400">{{ selected.meet_uri }}</p>
+                            <p v-if="erroSala" class="mt-2 text-xs text-amber-600 dark:text-amber-400">{{ erroSala }}</p>
+                            <p v-else-if="!selected.meet_uri" class="mt-2 text-xs text-zinc-400">
+                                A consulta abre no Google Meet, em outra aba. Conecte sua conta Google se ainda não fez.
+                            </p>
+                        </div>
+
                         <div>
                             <p class="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-1">Status</p>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold" :class="STATUS_COLORS[selected.status]">
