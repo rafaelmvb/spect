@@ -27,12 +27,19 @@ class Appointment extends Model
         'scheduled_date', 'scheduled_time', 'duration_minutes',
         'status', 'notes', 'admin_notes',
         'cancelled_reason', 'cancelled_at',
+        'meet_space_name',
+        'meet_uri',
+        'meet_code',
+        'meet_created_at',
+        'recording_consent_at',
     ];
 
     protected $casts = [
         'scheduled_date'  => 'date',
         'duration_minutes'=> 'integer',
         'cancelled_at'    => 'datetime',
+            'meet_created_at' => 'datetime',
+        'recording_consent_at' => 'datetime',
     ];
 
     public function scopeForTenant($query, ?int $tenantId)

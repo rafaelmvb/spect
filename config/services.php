@@ -18,6 +18,12 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    'google_meet' => [
+        'client_id' => env('GOOGLE_MEET_CLIENT_ID', ''),
+        'client_secret' => env('GOOGLE_MEET_CLIENT_SECRET', ''),
+        'redirect' => env('GOOGLE_MEET_REDIRECT', ''),
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

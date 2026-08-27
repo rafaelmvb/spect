@@ -724,6 +724,15 @@ Route::prefix('p')->middleware(['auth', 'role:profissional'])->name('profissiona
 
     // Agenda
     Route::get('/agenda', [\App\Http\Controllers\ProfessionalPanelController::class, 'agenda'])->name('agenda');
+
+    // Teleconsulta pelo Google Meet
+    Route::get('/meet/conectar', [\App\Http\Controllers\GoogleMeetController::class, 'conectar'])->name('meet.conectar');
+    Route::get('/meet/callback', [\App\Http\Controllers\GoogleMeetController::class, 'callback'])->name('meet.callback');
+    Route::delete('/meet/desconectar', [\App\Http\Controllers\GoogleMeetController::class, 'desconectar'])->name('meet.desconectar');
+    Route::post('/agenda/{appointment}/sala', [\App\Http\Controllers\GoogleMeetController::class, 'criarSala'])
+        ->whereNumber('appointment')->name('meet.sala');
+    Route::get('/agenda/{appointment}/transcricao', [\App\Http\Controllers\GoogleMeetController::class, 'transcricao'])
+        ->whereNumber('appointment')->name('meet.transcricao');
     Route::put('/agenda/{appointment}', [\App\Http\Controllers\ProfessionalPanelController::class, 'updateAppointment'])->name('agenda.appointment.update');
 
     // Disponibilidade
@@ -825,6 +834,11 @@ Route::prefix('m')->middleware(['member.area.resolve.from.user', 'member.area.ac
         ->middleware('throttle:120,1')
         ->name('member-area-app.telemetria');
     Route::get('mapa-neuro', [\App\Http\Controllers\MemberNeuroMapController::class, 'show']);
+
+    // Paciente autoriza (ou retira a autorizacao de) gravar e transcrever a consulta.
+    Route::post('consultas/{appointment}/consentimento', [\App\Http\Controllers\GoogleMeetController::class, 'registrarConsentimento'])
+        ->whereNumber('appointment')
+        ->middleware('throttle:20,1');
 
     // Perfis infantis: o responsavel cadastra e acompanha cada filho.
     Route::get('perfis-infantis', [\App\Http\Controllers\ChildProfilesController::class, 'index']);
