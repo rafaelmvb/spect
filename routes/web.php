@@ -857,6 +857,11 @@ Route::prefix('m')->middleware(['member.area.resolve.from.user', 'member.area.ac
         ->middleware('throttle:20,1');
 
     // Perfis infantis: o responsavel cadastra e acompanha cada filho.
+    // Central de Privacidade (LGPD): exportar e excluir os proprios dados.
+    Route::get('privacidade', [\App\Http\Controllers\PrivacidadeController::class, 'index']);
+    Route::get('privacidade/exportar', [\App\Http\Controllers\PrivacidadeController::class, 'exportar'])->middleware('throttle:5,1');
+    Route::delete('privacidade/conta', [\App\Http\Controllers\PrivacidadeController::class, 'excluirConta'])->middleware('throttle:5,1');
+
     Route::get('perfis-infantis', [\App\Http\Controllers\ChildProfilesController::class, 'index']);
     Route::post('perfis-infantis', [\App\Http\Controllers\ChildProfilesController::class, 'store'])->middleware('throttle:20,1');
     Route::put('perfis-infantis/{perfilId}', [\App\Http\Controllers\ChildProfilesController::class, 'update'])->whereNumber('perfilId');
