@@ -87,6 +87,7 @@ class ClinicalTestsController extends Controller
             'instructions'      => ['nullable', 'string', 'max:5000'],
             'estimated_minutes' => ['nullable', 'integer', 'min:1', 'max:999'],
             'is_active'         => ['nullable', 'boolean'],
+            'is_child_screening' => ['nullable', 'boolean'],
         ]);
 
         $maxPos = ClinicalTest::forTenant($this->tenantId())->max('position') ?? -1;
@@ -99,6 +100,7 @@ class ClinicalTestsController extends Controller
             'instructions'      => $validated['instructions'] ?? null,
             'estimated_minutes' => $validated['estimated_minutes'] ?? 5,
             'is_active'         => $validated['is_active'] ?? true,
+            'is_child_screening' => $validated['is_child_screening'] ?? false,
             'position'          => $maxPos + 1,
         ]);
 
@@ -116,6 +118,7 @@ class ClinicalTestsController extends Controller
             'instructions'      => ['nullable', 'string', 'max:5000'],
             'estimated_minutes' => ['nullable', 'integer', 'min:1', 'max:999'],
             'is_active'         => ['nullable', 'boolean'],
+            'is_child_screening' => ['nullable', 'boolean'],
         ]);
 
         $clinicalTest->update($validated);
@@ -327,6 +330,7 @@ class ClinicalTestsController extends Controller
             'instructions'      => $test->instructions,
             'estimated_minutes' => $test->estimated_minutes,
             'is_active'         => $test->is_active,
+            'is_child_screening' => (bool) $test->is_child_screening,
             'position'          => $test->position,
             'questions_count'   => $test->questions_count ?? 0,
             'sessions_count'    => $test->sessions_count ?? 0,

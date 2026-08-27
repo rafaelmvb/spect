@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ClinicalTestSession extends Model
 {
     protected $fillable = [
-        'user_id', 'clinical_test_id', 'product_id', 'status',
+        'user_id',
+        'child_profile_id',
+        'respondent_relationship', 'clinical_test_id', 'product_id', 'status',
         'score', 'result_label', 'challenge_tags', 'started_at', 'completed_at',
     ];
 

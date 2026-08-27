@@ -10,11 +10,12 @@ class ClinicalTest extends Model
 {
     protected $fillable = [
         'tenant_id', 'professional_user_id', 'name', 'category', 'description', 'instructions',
-        'estimated_minutes', 'is_active', 'position', 'ai_context',
+        'estimated_minutes', 'is_active', 'is_child_screening', 'position', 'ai_context',
     ];
 
     protected $casts = [
         'is_active'  => 'boolean',
+        'is_child_screening' => 'boolean',
         'ai_context' => 'array',
     ];
 

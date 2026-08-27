@@ -825,6 +825,12 @@ Route::prefix('m')->middleware(['member.area.resolve.from.user', 'member.area.ac
         ->middleware('throttle:120,1')
         ->name('member-area-app.telemetria');
     Route::get('mapa-neuro', [\App\Http\Controllers\MemberNeuroMapController::class, 'show']);
+
+    // Perfis infantis: o responsavel cadastra e acompanha cada filho.
+    Route::get('perfis-infantis', [\App\Http\Controllers\ChildProfilesController::class, 'index']);
+    Route::post('perfis-infantis', [\App\Http\Controllers\ChildProfilesController::class, 'store'])->middleware('throttle:20,1');
+    Route::put('perfis-infantis/{perfilId}', [\App\Http\Controllers\ChildProfilesController::class, 'update'])->whereNumber('perfilId');
+    Route::delete('perfis-infantis/{perfilId}', [\App\Http\Controllers\ChildProfilesController::class, 'destroy'])->whereNumber('perfilId');
     Route::get('profissionais', [\App\Http\Controllers\MemberProfessionalsController::class, 'index']);
     Route::get('profissionais/{professionalId}', [\App\Http\Controllers\MemberProfessionalsController::class, 'show'])->whereNumber('professionalId');
     Route::post('profissionais/{professionalId}/avaliar', [\App\Http\Controllers\MemberProfessionalsController::class, 'storeReview'])->middleware('throttle:5,1');

@@ -52,10 +52,19 @@ class MemberClinicalTestsController extends Controller
 
         // Sessões de todos os testes relevantes
         $allTestIds = $adminTests->pluck('id')->merge($assignedTests->pluck('id'))->unique();
-        $sessions   = ClinicalTestSession::where('user_id', $user->id)
+        $todasSessoes = ClinicalTestSession::where('user_id', $user->id)
             ->whereIn('clinical_test_id', $allTestIds)
-            ->get()
-            ->keyBy('clinical_test_id');
+            ->get();
+
+        // Autorrelato do proprio usuario: child_profile_id = 0.
+        $sessions = $todasSessoes->where('child_profile_id', 0)->keyBy('clinical_test_id');
+
+        // Rastreio infantil: uma sessao por crianca, agrupadas por teste.
+        $sessoesPorCrianca = $todasSessoes->where('child_profile_id', '!=', 0)->groupBy('clinical_test_id');
+
+        $perfisInfantis = \App\Models\ChildProfile::doResponsavel((int) $user->id)
+            ->orderBy('name')
+            ->get();
 
         $categories = ClinicalTest::forTenant($tenantId)
             ->whereNull('professional_user_id')
@@ -64,7 +73,30 @@ class MemberClinicalTestsController extends Controller
             ->pluck('category')
             ->values();
 
-        $mapTest = function (ClinicalTest $t) use ($sessions) {
+        /**
+         * Para um rastreio infantil, o estado e por crianca: cada filho tem a
+         * propria sessao, e um nao herda o resultado do outro.
+         */
+        $aplicacoesInfantis = function (ClinicalTest $t) use ($sessoesPorCrianca, $perfisInfantis) {
+            $doTeste = $sessoesPorCrianca->get($t->id, collect())->keyBy('child_profile_id');
+
+            return $perfisInfantis->map(function ($perfil) use ($doTeste) {
+                $sessao = $doTeste->get($perfil->id);
+
+                return [
+                    'child_profile_id' => $perfil->id,
+                    'nome' => $perfil->name,
+                    'idade' => $perfil->idade(),
+                    'status' => $sessao?->status ?? 'not_started',
+                    'session_id' => $sessao?->id,
+                    'result_label' => $sessao?->result_label,
+                    'completed_at' => $sessao?->completed_at?->format('d/m/Y'),
+                    'respondido_por' => $sessao?->respondent_relationship,
+                ];
+            })->values()->all();
+        };
+
+        $mapTest = function (ClinicalTest $t) use ($sessions, $aplicacoesInfantis) {
             $session = $sessions->get($t->id);
             return [
                 'id'                => $t->id,
@@ -79,11 +111,15 @@ class MemberClinicalTestsController extends Controller
                 'challenge_tags'    => $session?->challenge_tags ?? [],
                 'completed_at'      => $session?->completed_at?->format('d/m/Y'),
                 'is_assigned'       => false,
+                'is_child_screening' => (bool) $t->is_child_screening,
+                'aplicacoes_infantis' => $t->is_child_screening
+                    ? $aplicacoesInfantis($t)
+                    : [],
             ];
         };
 
         $testsData    = $adminTests->map($mapTest);
-        $assignedData = $assignedTests->map(function (ClinicalTest $t) use ($sessions) {
+        $assignedData = $assignedTests->map(function (ClinicalTest $t) use ($sessions, $aplicacoesInfantis) {
             $session = $sessions->get($t->id);
             return [
                 'id'                => $t->id,
@@ -98,6 +134,10 @@ class MemberClinicalTestsController extends Controller
                 'challenge_tags'    => $session?->challenge_tags ?? [],
                 'completed_at'      => $session?->completed_at?->format('d/m/Y'),
                 'is_assigned'       => true,
+                'is_child_screening' => (bool) $t->is_child_screening,
+                'aplicacoes_infantis' => $t->is_child_screening
+                    ? $aplicacoesInfantis($t)
+                    : [],
             ];
         });
 
@@ -112,6 +152,11 @@ class MemberClinicalTestsController extends Controller
             'assigned_tests' => $assignedData->values(),
             'categories'     => $categories,
             'category'       => $category ?? 'todos',
+            'perfis_infantis' => $perfisInfantis->map(fn ($p) => [
+                'id' => $p->id,
+                'nome' => $p->name,
+                'idade' => $p->idade(),
+            ])->values(),
         ]);
     }
 
@@ -187,20 +232,58 @@ class MemberClinicalTestsController extends Controller
 
         $test = $this->resolveAccessibleTest($testId, $user->id, $product);
 
-        // Reiniciar: apaga sessão anterior
-        $request->validate(['restart' => 'nullable|boolean']);
+        $request->validate([
+            'restart' => 'nullable|boolean',
+            'child_profile_id' => 'nullable|integer',
+        ]);
+
+        // Rastreio infantil e sempre respondido por um adulto em nome da crianca,
+        // nunca como autorrelato (escopo, Parte 03 par. 7).
+        $perfilInfantil = null;
+        if ($test->is_child_screening) {
+            $perfilInfantil = \App\Models\ChildProfile::doResponsavel((int) $user->id)
+                ->where('id', (int) $request->input('child_profile_id'))
+                ->first();
+
+            if (! $perfilInfantil) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Escolha para qual criança este rastreio será respondido.',
+                    'requires_child_profile' => true,
+                ], 422);
+            }
+        }
+
+        $childProfileId = $perfilInfantil?->id ?? 0;
+
+        // Reiniciar: apaga sessão anterior daquela criança (ou do autorrelato)
         if ($request->boolean('restart')) {
             ClinicalTestSession::where('user_id', $user->id)
                 ->where('clinical_test_id', $test->id)
+                ->where('child_profile_id', $childProfileId)
                 ->delete();
         }
 
         $session = ClinicalTestSession::firstOrCreate(
-            ['user_id' => $user->id, 'clinical_test_id' => $test->id],
-            ['product_id' => $product->id, 'status' => 'in_progress']
+            [
+                'user_id' => $user->id,
+                'clinical_test_id' => $test->id,
+                'child_profile_id' => $childProfileId,
+            ],
+            [
+                'product_id' => $product->id,
+                'status' => 'in_progress',
+                // Congela o vinculo no momento da aplicacao: editar o perfil
+                // depois nao reescreve o relatorio ja gerado.
+                'respondent_relationship' => $perfilInfantil?->relationship,
+            ]
         );
 
-        return response()->json(['success' => true, 'session_id' => $session->id]);
+        return response()->json([
+            'success' => true,
+            'session_id' => $session->id,
+            'child_profile_id' => $childProfileId ?: null,
+        ]);
     }
 
     // POST /m/testes/{testId}/responder — salva uma resposta (save-state por questão)
@@ -300,15 +383,24 @@ class MemberClinicalTestsController extends Controller
             'completed_at'  => now(),
         ]);
 
-        // Gera/atualiza tags de desafio no perfil do usuário
-        foreach ($challengeTags as $tag) {
-            UserChallengeTag::firstOrCreate([
-                'user_id'     => $user->id,
-                'tenant_id'   => $product->tenant_id,
-                'tag'         => $tag,
-                'source_type' => 'clinical_test',
-                'source_id'   => $session->id,
-            ]);
+        /*
+         * Tags de desafio vao para o perfil de quem o teste descreve.
+         *
+         * Num rastreio infantil quem responde e o adulto, mas o resultado e da
+         * crianca: gravar no responsavel contaminaria a trilha e o Mentor de IA
+         * dele com o quadro do filho. Nesse caso as tags ficam apenas na sessao,
+         * que pertence ao perfil infantil (escopo, Parte 01 e Parte 02 par. 2.2).
+         */
+        if ((int) $session->child_profile_id === 0) {
+            foreach ($challengeTags as $tag) {
+                UserChallengeTag::firstOrCreate([
+                    'user_id'     => $user->id,
+                    'tenant_id'   => $product->tenant_id,
+                    'tag'         => $tag,
+                    'source_type' => 'clinical_test',
+                    'source_id'   => $session->id,
+                ]);
+            }
         }
 
         return response()->json([
@@ -317,6 +409,7 @@ class MemberClinicalTestsController extends Controller
             'result_label'   => $resultLabel,
             'result_description' => $resultDescription,
             'challenge_tags' => $challengeTags,
+            'child_profile_id' => $session->child_profile_id ?: null,
         ]);
     }
 
